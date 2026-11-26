@@ -1,5 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Check, Copy, Download, Settings2, X } from 'lucide-react';
+import {
+  InterdentalGap,
+  SpanAnnotation,
+  ToothAnnotation,
+} from '../types/dental';
 import {
   DEFAULT_EXPORT_OPTIONS,
   ExportOptions,
@@ -7,9 +12,16 @@ import {
   downloadPngBlob,
   renderSvgToPngBlob,
 } from '../utils/exportPng';
+import { DentalChartSvg } from './DentalChartSvg';
 
 interface ExportModalProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
+  showPermanent: boolean;
+  showDeciduous: boolean;
+  annotations: Record<string, ToothAnnotation>;
+  gaps: InterdentalGap[];
+  spans: SpanAnnotation[];
+  generalNote: string;
   toothColor: string;
   annotationColor: string;
   onChangeToothColor: (color: string) => void;
@@ -48,6 +60,12 @@ const ANNOTATION_COLOR_PRESETS = [
 
 export const ExportModal: React.FC<ExportModalProps> = ({
   svgRef,
+  showPermanent,
+  showDeciduous,
+  annotations,
+  gaps,
+  spans,
+  generalNote,
   toothColor,
   annotationColor,
   onChangeToothColor,
@@ -55,52 +73,27 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onClose,
 }) => {
   const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [previewBlob, setPreviewBlob] = useState<Blob | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [copyError, setCopyError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    let currentUrl: string | null = null;
-
-    const generatePreview = async () => {
-      if (!svgRef.current) return;
-      try {
-        const blob = await renderSvgToPngBlob(svgRef.current, options);
-        if (cancelled) return;
-        currentUrl = URL.createObjectURL(blob);
-        setPreviewBlob(blob);
-        setPreviewUrl((prev) => {
-          if (prev) URL.revokeObjectURL(prev);
-          return currentUrl;
-        });
-      } catch {
-        // Ignore transient preview errors
-      }
-    };
-
-    generatePreview();
-
-    return () => {
-      cancelled = true;
-      if (currentUrl) URL.revokeObjectURL(currentUrl);
-    };
-  }, [svgRef, options, toothColor, annotationColor]);
-
   const handleDownload = async () => {
-    if (!svgRef.current) return;
-    const blob =
-      previewBlob ?? (await renderSvgToPngBlob(svgRef.current, options));
-    downloadPngBlob(blob, 'so-do-rang.png');
+    if (!svgRef.current || isProcessing) return;
+    setIsProcessing(true);
+    try {
+      const blob = await renderSvgToPngBlob(svgRef.current, options);
+      downloadPngBlob(blob, 'so-do-rang.png');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleCopy = async () => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || isProcessing) return;
     setCopyError(null);
+    setIsProcessing(true);
     try {
-      const blob =
-        previewBlob ?? (await renderSvgToPngBlob(svgRef.current, options));
+      const blob = await renderSvgToPngBlob(svgRef.current, options);
       await copyPngBlobToClipboard(blob);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -108,6 +101,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       setCopyError(
         err instanceof Error ? err.message : 'Không thể copy ảnh.'
       );
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -145,7 +140,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           {/* Preview Area */}
           <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-5 bg-slate-100 border-b lg:border-b-0 lg:border-r border-slate-200 min-h-[150px] sm:min-h-[260px]">
             <div
-              className="w-full max-w-2xl rounded-xl p-4 flex items-center justify-center overflow-hidden"
+              className="w-full max-w-2xl rounded-xl p-3 sm:p-4 flex items-center justify-center overflow-hidden"
               style={
                 isTransparent
                   ? {
@@ -158,15 +153,38 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   : { backgroundColor: '#e2e8f0' }
               }
             >
-              {previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt="Xem trước sơ đồ răng"
-                  className="max-h-[210px] sm:max-h-[420px] w-auto object-contain"
+              <div
+                className="w-full transition-colors"
+                style={
+                  isTransparent
+                    ? undefined
+                    : {
+                        backgroundColor: options.backgroundColor,
+                        border: options.hasBorder
+                          ? `2px solid ${options.borderColor}`
+                          : 'none',
+                        borderRadius: `${options.borderRadius}px`,
+                        padding: '10px',
+                      }
+                }
+              >
+                <DentalChartSvg
+                  showPermanent={showPermanent}
+                  showDeciduous={showDeciduous}
+                  annotations={annotations}
+                  gaps={gaps}
+                  spans={spans}
+                  generalNote={generalNote}
+                  selectedFdi={null}
+                  onSelectTooth={() => {}}
+                  toothColor={toothColor}
+                  annotationColor={annotationColor}
+                  showDentitionTitles={options.showDentitionTitles}
+                  showSideLabels={options.showSideLabels}
+                  interactive={false}
+                  className="block w-full h-auto max-h-[210px] sm:max-h-[400px] select-none"
                 />
-              ) : (
-                <span className="text-sm text-slate-500">Đang tạo xem trước...</span>
-              )}
+              </div>
             </div>
             <p className="mt-2.5 text-xs text-slate-500">
               {isTransparent

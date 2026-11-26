@@ -749,6 +749,12 @@ export function App() {
       {showExportModal && (
         <ExportModal
           svgRef={svgRef}
+          showPermanent={showPermanent}
+          showDeciduous={showDeciduous}
+          annotations={annotations}
+          gaps={gaps}
+          spans={spans}
+          generalNote={generalNote}
           toothColor={toothColor}
           annotationColor={annotationColor}
           onChangeToothColor={setToothColor}

@@ -28,10 +28,13 @@ interface DentalChartSvgProps {
     leftTooth: ToothMeta,
     rightTooth: ToothMeta
   ) => void;
-  svgRef: React.RefObject<SVGSVGElement | null>;
+  svgRef?: React.RefObject<SVGSVGElement | null>;
   className?: string;
   toothColor?: string;
   annotationColor?: string;
+  showDentitionTitles?: boolean;
+  showSideLabels?: boolean;
+  interactive?: boolean;
 }
 
 const CENTER_X = 450;
@@ -47,7 +50,7 @@ export function getToothX(dentition: DentitionType, indexInRow: number): number 
   return CENTER_X + MID_OFFSET + (indexInRow - half) * COL_STEP;
 }
 
-export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
+export const DentalChartSvg: React.FC<DentalChartSvgProps> = React.memo(({
   showPermanent,
   showDeciduous,
   annotations,
@@ -61,6 +64,9 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
   className,
   toothColor = '#111827',
   annotationColor = BLUE,
+  showDentitionTitles = true,
+  showSideLabels = true,
+  interactive = true,
 }) => {
   // Compute vertical layout dynamically
   let currentY = 26;
@@ -115,23 +121,25 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
           return (
             <g
               key={tooth.fdi}
-              onClick={() => onSelectTooth(tooth)}
-              style={{ cursor: 'pointer' }}
-              className="tooth-group"
+              onClick={interactive ? () => onSelectTooth(tooth) : undefined}
+              style={interactive ? { cursor: 'pointer' } : undefined}
+              className={interactive ? 'tooth-group' : undefined}
             >
               {/* Interactive hit target & selection highlight (excluded on PNG export) */}
-              <rect
-                data-export-exclude="true"
-                x={x - 21}
-                y={y - 33}
-                width={42}
-                height={66}
-                rx={7}
-                fill={isSelected ? 'rgba(37, 99, 235, 0.10)' : 'transparent'}
-                stroke={isSelected ? '#2563EB' : 'transparent'}
-                strokeWidth={1.5}
-                className="tooth-hit-rect"
-              />
+              {interactive && (
+                <rect
+                  data-export-exclude="true"
+                  x={x - 21}
+                  y={y - 33}
+                  width={42}
+                  height={66}
+                  rx={7}
+                  fill={isSelected ? 'rgba(37, 99, 235, 0.10)' : 'transparent'}
+                  stroke={isSelected ? '#2563EB' : 'transparent'}
+                  strokeWidth={1.5}
+                  className="tooth-hit-rect"
+                />
+              )}
               <ToothSymbolSvg
                 display={tooth.display}
                 jaw={jaw}
@@ -147,7 +155,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
         })}
 
         {/* Interdental gap click targets (subtle, excluded on PNG export) */}
-        {onSelectGap &&
+        {interactive && onSelectGap &&
           rowTeeth.slice(0, -1).map((leftTooth, idx) => {
             const rightTooth = rowTeeth[idx + 1];
             const x1 = getToothX(dentition, leftTooth.indexInRow);
@@ -296,7 +304,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
       aria-label="Sơ đồ răng nha khoa"
     >
       {/* Phải / Trái anatomical labels */}
-      {(showPermanent || showDeciduous) && (
+      {showSideLabels && (showPermanent || showDeciduous) && (
         <g data-side-label="true">
           <g transform={`translate(18, ${badgeCenterY - 14})`}>
             <rect
@@ -351,18 +359,20 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
       {/* Permanent Dentition (Răng vĩnh viễn) */}
       {showPermanent && (
         <g>
-          <text
-            data-dentition-title="true"
-            x={CENTER_X}
-            y={permStartY + 8}
-            textAnchor="middle"
-            fill="#111827"
-            fontFamily="'Times New Roman', Georgia, serif"
-            fontSize="15"
-            fontWeight="700"
-          >
-            Răng vĩnh viễn
-          </text>
+          {showDentitionTitles && (
+            <text
+              data-dentition-title="true"
+              x={CENTER_X}
+              y={permStartY + 8}
+              textAnchor="middle"
+              fill="#111827"
+              fontFamily="'Times New Roman', Georgia, serif"
+              fontSize="15"
+              fontWeight="700"
+            >
+              Răng vĩnh viễn
+            </text>
+          )}
 
           {/* Crosshair grid */}
           <line
@@ -394,18 +404,20 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
       {/* Deciduous Dentition (Răng sữa) */}
       {showDeciduous && (
         <g>
-          <text
-            data-dentition-title="true"
-            x={CENTER_X}
-            y={decStartY + 8}
-            textAnchor="middle"
-            fill="#111827"
-            fontFamily="'Times New Roman', Georgia, serif"
-            fontSize="15"
-            fontWeight="700"
-          >
-            Răng sữa
-          </text>
+          {showDentitionTitles && (
+            <text
+              data-dentition-title="true"
+              x={CENTER_X}
+              y={decStartY + 8}
+              textAnchor="middle"
+              fill="#111827"
+              fontFamily="'Times New Roman', Georgia, serif"
+              fontSize="15"
+              fontWeight="700"
+            >
+              Răng sữa
+            </text>
+          )}
 
           {/* Crosshair grid */}
           <line
@@ -454,4 +466,4 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
       )}
     </svg>
   );
-};
+});

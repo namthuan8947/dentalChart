@@ -29,16 +29,50 @@ import {
   renderSvgToPngBlob,
 } from './utils/exportPng';
 
+const STORAGE_KEY = 'dental-chart-state-v1';
+
+interface SavedChartState {
+  showPermanent?: boolean;
+  showDeciduous?: boolean;
+  annotations?: Record<string, ToothAnnotation>;
+  gaps?: InterdentalGap[];
+  spans?: SpanAnnotation[];
+  generalNote?: string;
+  toothColor?: string;
+  annotationColor?: string;
+}
+
+function loadSavedState(): SavedChartState {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
 export function App() {
-  const [showPermanent, setShowPermanent] = useState(true);
-  const [showDeciduous, setShowDeciduous] = useState(false);
+  const [initialState] = useState<SavedChartState>(() => loadSavedState());
+
+  const [showPermanent, setShowPermanent] = useState(
+    initialState.showPermanent ?? true
+  );
+  const [showDeciduous, setShowDeciduous] = useState(
+    initialState.showDeciduous ?? false
+  );
 
   const [annotations, setAnnotations] = useState<
     Record<string, ToothAnnotation>
-  >({});
-  const [gaps, setGaps] = useState<InterdentalGap[]>([]);
-  const [spans, setSpans] = useState<SpanAnnotation[]>([]);
-  const [generalNote, setGeneralNote] = useState('');
+  >(initialState.annotations ?? {});
+  const [gaps, setGaps] = useState<InterdentalGap[]>(initialState.gaps ?? []);
+  const [spans, setSpans] = useState<SpanAnnotation[]>(
+    initialState.spans ?? []
+  );
+  const [generalNote, setGeneralNote] = useState(
+    initialState.generalNote ?? ''
+  );
 
   const [modalState, setModalState] = useState<{
     tooth: ToothMeta;
@@ -49,10 +83,41 @@ export function App() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
   const [showColorEditor, setShowColorEditor] = useState(false);
-  const [toothColor, setToothColor] = useState('#111827');
-  const [annotationColor, setAnnotationColor] = useState('#1D4ED8');
+  const [toothColor, setToothColor] = useState(
+    initialState.toothColor ?? '#111827'
+  );
+  const [annotationColor, setAnnotationColor] = useState(
+    initialState.annotationColor ?? '#1D4ED8'
+  );
   const [copiedQuick, setCopiedQuick] = useState(false);
   const [mobileZoomed, setMobileZoomed] = useState(true);
+
+  useEffect(() => {
+    try {
+      const payload: SavedChartState = {
+        showPermanent,
+        showDeciduous,
+        annotations,
+        gaps,
+        spans,
+        generalNote,
+        toothColor,
+        annotationColor,
+      };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      // Ignore storage quota or private-mode errors
+    }
+  }, [
+    showPermanent,
+    showDeciduous,
+    annotations,
+    gaps,
+    spans,
+    generalNote,
+    toothColor,
+    annotationColor,
+  ]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
   const chartScrollRef = useRef<HTMLDivElement | null>(null);

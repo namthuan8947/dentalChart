@@ -5,6 +5,8 @@ import {
   Copy,
   Download,
   FileText,
+  Maximize2,
+  Minimize2,
   Palette,
   RotateCcw,
   ZoomIn,
@@ -93,6 +95,7 @@ export function App() {
   );
   const [copiedQuick, setCopiedQuick] = useState(false);
   const [uiZoom, setUiZoom] = useState<number>(initialState.uiZoom ?? 1);
+  const [mobileZoomed, setMobileZoomed] = useState(true);
 
   useEffect(() => {
     document.documentElement.style.zoom = uiZoom === 1 ? '' : String(uiZoom);
@@ -131,6 +134,19 @@ export function App() {
   ]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const chartScrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = chartScrollRef.current;
+    if (!el) return;
+    if (!mobileZoomed) {
+      el.scrollLeft = 0;
+      return;
+    }
+    if (el.scrollWidth > el.clientWidth) {
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    }
+  }, [mobileZoomed, showPermanent, showDeciduous]);
 
   const handleTogglePermanent = (checked: boolean) => {
     if (!checked && !showDeciduous) return;
@@ -406,52 +422,14 @@ export function App() {
                 <button
                   type="button"
                   onClick={() => setShowResetConfirm(true)}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-300 bg-rose-50 text-rose-700 shadow-xs transition active:bg-rose-100"
+                  className="inline-flex h-9 shrink-0 items-center justify-center gap-1 rounded-lg border border-rose-300 bg-rose-50 px-2.5 text-xs font-semibold text-rose-700 shadow-xs transition active:bg-rose-100"
                   title="Đặt lại toàn bộ sơ đồ"
                   aria-label="Đặt lại"
                 >
-                  <RotateCcw className="h-4 w-4" />
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  <span>Đặt lại</span>
                 </button>
               )}
-
-              <div
-                className="inline-flex h-9 shrink-0 items-center rounded-lg border border-slate-300 bg-white px-0.5"
-                role="group"
-                aria-label="Thu phóng giao diện"
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setUiZoom((z) => Math.max(0.7, Number((z - 0.1).toFixed(2))))
-                  }
-                  disabled={uiZoom <= 0.7}
-                  className="flex h-7 w-6 items-center justify-center rounded text-slate-700 disabled:opacity-40"
-                  title="Thu nhỏ giao diện"
-                  aria-label="Thu nhỏ giao diện"
-                >
-                  <ZoomOut className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setUiZoom(1)}
-                  className="px-0.5 text-[11px] font-semibold tabular-nums text-slate-700"
-                  title="Đưa về 100%"
-                >
-                  {Math.round(uiZoom * 100)}%
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    setUiZoom((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))
-                  }
-                  disabled={uiZoom >= 1.5}
-                  className="flex h-7 w-6 items-center justify-center rounded text-slate-700 disabled:opacity-40"
-                  title="Phóng to giao diện"
-                  aria-label="Phóng to giao diện"
-                >
-                  <ZoomIn className="h-3.5 w-3.5" />
-                </button>
-              </div>
             </div>
           </div>
 
@@ -689,7 +667,36 @@ export function App() {
       {/* Main Stage: Focus on the Dental Chart */}
       <main className="flex-1 flex flex-col items-center justify-center px-3 py-4 sm:px-6 sm:py-6">
         <div className="w-full max-w-[1000px] rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-8 shadow-sm">
-          <div className="w-full overflow-x-auto sm:overflow-visible">
+          {/* Mobile chart zoom/collapse bar */}
+          <div className="mb-2 flex items-center justify-between gap-2 sm:hidden">
+            <span className="text-[11px] font-medium text-slate-500">
+              {mobileZoomed
+                ? '← Vuốt ngang để xem toàn hàm →'
+                : 'Đang thu gọn toàn hàm'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setMobileZoomed((z) => !z)}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 active:bg-slate-100"
+            >
+              {mobileZoomed ? (
+                <>
+                  <Minimize2 className="h-3 w-3" />
+                  <span>Thu gọn</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="h-3 w-3" />
+                  <span>Phóng to</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div
+            ref={chartScrollRef}
+            className="w-full overflow-x-auto sm:overflow-visible"
+          >
             <DentalChartSvg
               svgRef={svgRef}
               showPermanent={showPermanent}
@@ -705,7 +712,11 @@ export function App() {
               onSelectGap={handleSelectGapDirect}
               toothColor={toothColor}
               annotationColor={annotationColor}
-              className="block mx-auto w-[640px] max-w-none sm:w-full sm:max-w-[960px] h-auto select-none"
+              className={
+                mobileZoomed
+                  ? 'block mx-auto w-[680px] max-w-none sm:w-full sm:max-w-[960px] h-auto select-none'
+                  : 'block mx-auto w-full max-w-[960px] h-auto select-none'
+              }
             />
           </div>
         </div>

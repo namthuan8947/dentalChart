@@ -38,7 +38,8 @@ export type SingleConditionId =
   | 'worn'
   | 'fistula'
   | 'malformed'
-  | 'gingival_recession';
+  | 'gingival_recession'
+  | 'custom';
 
 export interface ToothAnnotation {
   conditionId?: SingleConditionId;
@@ -48,6 +49,7 @@ export interface ToothAnnotation {
   cariesPosition?: CariesPosition;
   cariesPositions?: CariesPosition[];
   tempMaterial?: TempMaterial;
+  customNote?: string;
 }
 
 export interface ToothMeta {

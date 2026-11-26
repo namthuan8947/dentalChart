@@ -139,6 +139,9 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
   const [tempMaterial, setTempMaterial] = useState<TempMaterial>(
     currentAnnotation?.tempMaterial ?? 'Cav, Eu'
   );
+  const [customNote, setCustomNote] = useState<string>(
+    currentAnnotation?.customNote ?? ''
+  );
 
   // Row teeth for gap / span
   const rowTeeth = useMemo(() => {
@@ -217,6 +220,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
     cariesPosition: cariesPositions[0],
     cariesPositions,
     tempMaterial,
+    customNote,
   };
 
   const spanRangeTeeth = useMemo(() => {
@@ -625,6 +629,60 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                   </div>
                 </div>
               ))}
+
+              {/* Custom note condition at the bottom */}
+              <div>
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Ghi chú tùy chỉnh
+                </h3>
+                <div
+                  className={`rounded-lg border transition ${
+                    selectedConditions.includes('custom')
+                      ? 'border-blue-600 bg-blue-50/70 text-blue-950 ring-1 ring-blue-600'
+                      : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 px-3 py-2.5">
+                    <button
+                      type="button"
+                      onClick={() => toggleCondition('custom')}
+                      className="flex shrink-0 items-center gap-2.5 text-left text-sm"
+                    >
+                      <span
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                          selectedConditions.includes('custom')
+                            ? 'border-blue-600 bg-blue-600 text-white'
+                            : 'border-slate-300 bg-white'
+                        }`}
+                      >
+                        {selectedConditions.includes('custom') && (
+                          <Check className="h-3 w-3 stroke-[3]" />
+                        )}
+                      </span>
+                      <span className="font-medium">Khác:</span>
+                    </button>
+
+                    <input
+                      type="text"
+                      value={customNote}
+                      onFocus={() => {
+                        if (!selectedConditions.includes('custom')) {
+                          toggleCondition('custom');
+                        }
+                      }}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomNote(val);
+                        if (val.trim() && !selectedConditions.includes('custom')) {
+                          toggleCondition('custom');
+                        }
+                      }}
+                      placeholder="Nhập ghi chú riêng cho răng này..."
+                      className="flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         ) : (

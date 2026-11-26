@@ -67,6 +67,10 @@ export function getLabelsForCondition(
       return 'dị dạng';
     case 'gingival_recession':
       return 'tụt nướu';
+    case 'custom': {
+      const note = annotation?.customNote?.trim();
+      return note ? note : null;
+    }
     default:
       return null;
   }

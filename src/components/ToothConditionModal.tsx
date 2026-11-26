@@ -20,8 +20,12 @@ import {
 } from '../types/dental';
 import { ToothSymbolSvg } from './ToothSymbolSvg';
 
+export type ModalTab = 'single' | 'gap' | 'span';
+
 interface ToothConditionModalProps {
   tooth: ToothMeta;
+  initialTab?: ModalTab;
+  initialGapNeighborFdi?: string;
   currentAnnotation?: ToothAnnotation;
   existingGaps: InterdentalGap[];
   existingSpans: SpanAnnotation[];
@@ -35,10 +39,10 @@ interface ToothConditionModalProps {
   annotationColor?: string;
 }
 
-type ModalTab = 'single' | 'gap' | 'span';
-
 export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
   tooth,
+  initialTab = 'single',
+  initialGapNeighborFdi,
   currentAnnotation,
   existingGaps,
   existingSpans,
@@ -51,7 +55,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
   toothColor = '#111827',
   annotationColor = '#1D4ED8',
 }) => {
-  const [tab, setTab] = useState<ModalTab>('single');
+  const [tab, setTab] = useState<ModalTab>(initialTab);
   const [search, setSearch] = useState('');
 
   // Single-tooth multi-select state
@@ -153,10 +157,16 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
     (t) => t.indexInRow === tooth.indexInRow - 1
   );
   const defaultNeighbor = rightNeighbor || leftNeighbor;
-  const [gapNeighborFdi, setGapNeighborFdi] = useState<string>(
-    defaultNeighbor?.fdi ?? ''
-  );
-  const [gapMm, setGapMm] = useState<string>('2');
+  const initialNeighbor = initialGapNeighborFdi || defaultNeighbor?.fdi || '';
+  const [gapNeighborFdi, setGapNeighborFdi] = useState<string>(initialNeighbor);
+  const [gapMm, setGapMm] = useState<string>(() => {
+    const existing = existingGaps.find(
+      (g) =>
+        (g.leftToothFdi === tooth.fdi && g.rightToothFdi === initialNeighbor) ||
+        (g.rightToothFdi === tooth.fdi && g.leftToothFdi === initialNeighbor)
+    );
+    return existing?.distanceMm ?? '2';
+  });
 
   // Span state (#25-28 Bridge / #36 Crowding)
   const [spanType, setSpanType] = useState<'bridge' | 'crowding'>('bridge');

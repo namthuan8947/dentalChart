@@ -13,7 +13,7 @@ import {
 import { DentalChartSvg } from './components/DentalChartSvg';
 import { ExportModal } from './components/ExportModal';
 import { LegendModal } from './components/LegendModal';
-import { ToothConditionModal } from './components/ToothConditionModal';
+import { ModalTab, ToothConditionModal } from './components/ToothConditionModal';
 import { DECIDUOUS_TEETH, PERMANENT_TEETH } from './data/dentalConditions';
 import {
   DentitionType,
@@ -40,7 +40,11 @@ export function App() {
   const [spans, setSpans] = useState<SpanAnnotation[]>([]);
   const [generalNote, setGeneralNote] = useState('');
 
-  const [selectedTooth, setSelectedTooth] = useState<ToothMeta | null>(null);
+  const [modalState, setModalState] = useState<{
+    tooth: ToothMeta;
+    initialTab?: ModalTab;
+    gapNeighborFdi?: string;
+  } | null>(null);
   const [showLegend, setShowLegend] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
@@ -118,33 +122,16 @@ export function App() {
   };
 
   const handleSelectGapDirect = (
-    dentition: DentitionType,
-    jaw: JawType,
+    _dentition: DentitionType,
+    _jaw: JawType,
     leftTooth: ToothMeta,
     rightTooth: ToothMeta
   ) => {
-    const existing = gaps.find(
-      (g) => g.leftToothFdi === leftTooth.fdi && g.rightToothFdi === rightTooth.fdi
-    );
-    const input = window.prompt(
-      `Nhập khoảng cách khe hở (mm) giữa răng ${leftTooth.display} và ${rightTooth.display} (để trống để xóa):`,
-      existing?.distanceMm ?? '2'
-    );
-    if (input === null) return;
-    const trimmed = input.trim();
-    const id = `gap-${leftTooth.fdi}-${rightTooth.fdi}`;
-    if (!trimmed) {
-      handleDeleteGap(id);
-    } else {
-      handleSaveGap({
-        id,
-        dentition,
-        jaw,
-        leftToothFdi: leftTooth.fdi,
-        rightToothFdi: rightTooth.fdi,
-        distanceMm: trimmed,
-      });
-    }
+    setModalState({
+      tooth: leftTooth,
+      initialTab: 'gap',
+      gapNeighborFdi: rightTooth.fdi,
+    });
   };
 
   const handleReset = () => {
@@ -152,7 +139,7 @@ export function App() {
     setGaps([]);
     setSpans([]);
     setGeneralNote('');
-    setSelectedTooth(null);
+    setModalState(null);
   };
 
   const handleQuickCopyPng = async () => {
@@ -181,8 +168,8 @@ export function App() {
   };
 
   const activeSelectedFdi =
-    selectedTooth && hasVisibleTooth(selectedTooth.fdi)
-      ? selectedTooth.fdi
+    modalState?.tooth && hasVisibleTooth(modalState.tooth.fdi)
+      ? modalState.tooth.fdi
       : null;
 
   return (
@@ -591,7 +578,9 @@ export function App() {
                 spans={spans}
                 generalNote={generalNote}
                 selectedFdi={activeSelectedFdi}
-                onSelectTooth={(tooth) => setSelectedTooth(tooth)}
+                onSelectTooth={(tooth) =>
+                  setModalState({ tooth, initialTab: 'single' })
+                }
                 onSelectGap={handleSelectGapDirect}
                 toothColor={toothColor}
                 annotationColor={annotationColor}
@@ -618,10 +607,12 @@ export function App() {
       </main>
 
       {/* Tooth Condition Selection Modal */}
-      {selectedTooth && (
+      {modalState && (
         <ToothConditionModal
-          tooth={selectedTooth}
-          currentAnnotation={annotations[selectedTooth.fdi]}
+          tooth={modalState.tooth}
+          initialTab={modalState.initialTab}
+          initialGapNeighborFdi={modalState.gapNeighborFdi}
+          currentAnnotation={annotations[modalState.tooth.fdi]}
           existingGaps={gaps}
           existingSpans={spans}
           onConfirmSingle={handleConfirmSingle}
@@ -629,7 +620,7 @@ export function App() {
           onDeleteGap={handleDeleteGap}
           onSaveSpan={handleSaveSpan}
           onDeleteSpan={handleDeleteSpan}
-          onClose={() => setSelectedTooth(null)}
+          onClose={() => setModalState(null)}
           toothColor={toothColor}
           annotationColor={annotationColor}
         />

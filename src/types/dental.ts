@@ -41,7 +41,8 @@ export type SingleConditionId =
   | 'gingival_recession';
 
 export interface ToothAnnotation {
-  conditionId: SingleConditionId;
+  conditionId?: SingleConditionId;
+  conditionIds?: SingleConditionId[];
   tiltDirection?: TiltDirection;
   deviationDirection?: DirectionOption;
   cariesPosition?: CariesPosition;

@@ -1,5 +1,11 @@
 import React from 'react';
-import { CariesPosition, JawType, SideType, ToothAnnotation } from '../types/dental';
+import {
+  CariesPosition,
+  JawType,
+  SideType,
+  SingleConditionId,
+  ToothAnnotation,
+} from '../types/dental';
 
 interface ToothSymbolSvgProps {
   display: string;
@@ -15,11 +21,13 @@ interface ToothSymbolSvgProps {
 const BLUE = '#1D4ED8';
 const BLACK = '#111827';
 
-export function getAnnotationLabel(annotation?: ToothAnnotation): string | null {
-  if (!annotation) return null;
-  switch (annotation.conditionId) {
+export function getLabelsForCondition(
+  cond: SingleConditionId,
+  annotation?: ToothAnnotation
+): string | null {
+  switch (cond) {
     case 'deviated':
-      return `lệch ${annotation.deviationDirection || 'G'}`;
+      return `lệch ${annotation?.deviationDirection || 'G'}`;
     case 'rotated':
       return 'xoay';
     case 'erupting':
@@ -40,7 +48,7 @@ export function getAnnotationLabel(annotation?: ToothAnnotation): string | null 
     case 'filling_a_redo':
       return 'A';
     case 'temp_filling':
-      return annotation.tempMaterial || 'Cav, Eu';
+      return annotation?.tempMaterial || 'Cav, Eu';
     case 'cervical_wear':
       return 'MC';
     case 'crown':
@@ -74,25 +82,40 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
   inkColor = BLUE,
   numberColor = BLACK,
 }) => {
-  const cond = annotation?.conditionId ?? 'normal';
+  const activeConds: SingleConditionId[] =
+    annotation?.conditionIds && annotation.conditionIds.length > 0
+      ? annotation.conditionIds
+      : annotation?.conditionId
+      ? [annotation.conditionId]
+      : ['normal'];
+
+  const has = (id: SingleConditionId) => activeConds.includes(id);
+
   const isUpper = jaw === 'upper';
-  const labelY = isUpper ? -23 : 24;
   const arrowY = isUpper ? -22 : 21;
 
   const hasCircle =
-    cond === 'root_restore' ||
-    cond === 'caries_restore' ||
-    cond === 'filling_co_redo' ||
-    cond === 'filling_gic_redo' ||
-    cond === 'filling_a_redo' ||
-    cond === 'temp_filling';
+    has('root_restore') ||
+    has('caries_restore') ||
+    has('filling_co_redo') ||
+    has('filling_gic_redo') ||
+    has('filling_a_redo') ||
+    has('temp_filling');
 
-  const hasRoot = cond === 'root' || cond === 'root_extract' || cond === 'root_restore';
-  const hasSlash = cond === 'extract' || cond === 'root_extract';
-  const isMissing = cond === 'missing';
-  const hideNumber = isMissing || cond === 'root_extract';
-  const hasCaries = cond === 'caries_no_restore' || cond === 'caries_restore';
-  const labelText = getAnnotationLabel(annotation);
+  const hasRoot = has('root') || has('root_extract') || has('root_restore');
+  const hasSlash = has('extract') || has('root_extract');
+  const isMissing = has('missing');
+  const hideNumber = isMissing;
+  const hasCaries = has('caries_no_restore') || has('caries_restore');
+  const hasTilt = has('tilt');
+
+  const labels: string[] = [];
+  for (const cond of activeConds) {
+    const lbl = getLabelsForCondition(cond, annotation);
+    if (lbl && !labels.includes(lbl)) {
+      labels.push(lbl);
+    }
+  }
 
   const getCariesCoords = (pos: CariesPosition) => {
     switch (pos) {
@@ -143,11 +166,7 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
       {/* Root radical sign √ */}
       {hasRoot && (
         <path
-          d={
-            cond === 'root_extract'
-              ? 'M -12 1 L -8 8 L -3 -11 L 9 -11'
-              : 'M -13 2 L -9 9 L -4 -12 L 10 -12'
-          }
+          d="M -13 2 L -9 9 L -4 -12 L 10 -12"
           fill="none"
           stroke={inkColor}
           strokeWidth="1.6"
@@ -200,7 +219,7 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
         })}
 
       {/* Tilt arrow */}
-      {cond === 'tilt' && (
+      {hasTilt && (
         <g stroke={inkColor} strokeWidth="1.7" fill="none" strokeLinecap="round" strokeLinejoin="round">
           {annotation?.tiltDirection === 'left' ? (
             <>
@@ -216,20 +235,28 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
         </g>
       )}
 
-      {/* Text label (above for upper jaw, below for lower jaw) */}
-      {labelText && (
-        <text
-          x={0}
-          y={labelY}
-          textAnchor="middle"
-          fill={inkColor}
-          fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
-          fontSize="10"
-          fontWeight="600"
-        >
-          {labelText}
-        </text>
-      )}
+      {/* Text label(s) (above for upper jaw, below for lower jaw) */}
+      {labels.map((lbl, idx) => {
+        const baseOffset = hasTilt ? 33 : 23;
+        const step = 11;
+        const ly = isUpper
+          ? -(baseOffset + idx * step)
+          : baseOffset + idx * step;
+        return (
+          <text
+            key={lbl}
+            x={0}
+            y={ly}
+            textAnchor="middle"
+            fill={inkColor}
+            fontFamily="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"
+            fontSize="9.5"
+            fontWeight="600"
+          >
+            {lbl}
+          </text>
+        );
+      })}
     </g>
   );
 };

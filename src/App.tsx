@@ -1,11 +1,14 @@
 import { useRef, useState } from 'react';
 import {
   BookOpen,
+  Check,
+  Copy,
   Download,
   FileText,
   RotateCcw,
 } from 'lucide-react';
 import { DentalChartSvg } from './components/DentalChartSvg';
+import { ExportModal } from './components/ExportModal';
 import { LegendModal } from './components/LegendModal';
 import { ToothConditionModal } from './components/ToothConditionModal';
 import { DECIDUOUS_TEETH, PERMANENT_TEETH } from './data/dentalConditions';
@@ -17,7 +20,11 @@ import {
   ToothAnnotation,
   ToothMeta,
 } from './types/dental';
-import { exportSvgToTransparentPng } from './utils/exportPng';
+import {
+  DEFAULT_EXPORT_OPTIONS,
+  copyPngBlobToClipboard,
+  renderSvgToPngBlob,
+} from './utils/exportPng';
 
 export function App() {
   const [showPermanent, setShowPermanent] = useState(true);
@@ -32,8 +39,9 @@ export function App() {
 
   const [selectedTooth, setSelectedTooth] = useState<ToothMeta | null>(null);
   const [showLegend, setShowLegend] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
+  const [copiedQuick, setCopiedQuick] = useState(false);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -50,7 +58,8 @@ export function App() {
   const handleConfirmSingle = (fdi: string, annotation: ToothAnnotation) => {
     setAnnotations((prev) => {
       const next = { ...prev };
-      if (annotation.conditionId === 'normal') {
+      const ids = annotation.conditionIds ?? (annotation.conditionId ? [annotation.conditionId] : ['normal']);
+      if (ids.length === 0 || (ids.length === 1 && ids[0] === 'normal')) {
         delete next[fdi];
       } else {
         next[fdi] = annotation;
@@ -129,13 +138,19 @@ export function App() {
     setSelectedTooth(null);
   };
 
-  const handleExportPng = async () => {
-    if (!svgRef.current || isExporting) return;
-    setIsExporting(true);
+  const handleQuickCopyPng = async () => {
+    if (!svgRef.current) return;
     try {
-      await exportSvgToTransparentPng(svgRef.current, 'so-do-rang.png', 3);
-    } finally {
-      setIsExporting(false);
+      const blob = await renderSvgToPngBlob(
+        svgRef.current,
+        DEFAULT_EXPORT_OPTIONS
+      );
+      await copyPngBlobToClipboard(blob);
+      setCopiedQuick(true);
+      setTimeout(() => setCopiedQuick(false), 2000);
+    } catch {
+      // Fallback: open export modal where user can see any clipboard message
+      setShowExportModal(true);
     }
   };
 
@@ -241,12 +256,30 @@ export function App() {
 
             <button
               type="button"
-              onClick={handleExportPng}
-              disabled={isExporting}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
+              onClick={handleQuickCopyPng}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+              title="Copy ảnh sơ đồ răng không nền vào clipboard"
+            >
+              {copiedQuick ? (
+                <>
+                  <Check className="h-4 w-4 text-emerald-600" />
+                  <span className="text-emerald-700">Đã copy!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="h-4 w-4 text-slate-600" />
+                  <span>Copy ảnh</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowExportModal(true)}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
             >
               <Download className="h-4 w-4" />
-              <span>{isExporting ? 'Đang xuất...' : 'Export'}</span>
+              <span>Export</span>
             </button>
           </div>
         </div>
@@ -330,6 +363,14 @@ export function App() {
 
       {/* Legend Modal (Chú giải) */}
       {showLegend && <LegendModal onClose={() => setShowLegend(false)} />}
+
+      {/* Export Preview & Settings Modal */}
+      {showExportModal && (
+        <ExportModal
+          svgRef={svgRef}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
     </div>
   );
 }

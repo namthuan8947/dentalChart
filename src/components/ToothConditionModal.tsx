@@ -50,10 +50,36 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
   const [tab, setTab] = useState<ModalTab>('single');
   const [search, setSearch] = useState('');
 
-  // Single-tooth state
-  const [conditionId, setConditionId] = useState<SingleConditionId>(
-    currentAnnotation?.conditionId ?? 'normal'
-  );
+  // Single-tooth multi-select state
+  const [selectedConditions, setSelectedConditions] = useState<
+    SingleConditionId[]
+  >(() => {
+    if (
+      currentAnnotation?.conditionIds &&
+      currentAnnotation.conditionIds.length > 0
+    ) {
+      return currentAnnotation.conditionIds;
+    }
+    if (currentAnnotation?.conditionId) {
+      return [currentAnnotation.conditionId];
+    }
+    return ['normal'];
+  });
+
+  const toggleCondition = (id: SingleConditionId) => {
+    if (id === 'normal') {
+      setSelectedConditions(['normal']);
+      return;
+    }
+    setSelectedConditions((prev) => {
+      const withoutNormal = prev.filter((c) => c !== 'normal');
+      const exists = withoutNormal.includes(id);
+      const next = exists
+        ? withoutNormal.filter((c) => c !== id)
+        : [...withoutNormal, id];
+      return next.length > 0 ? next : ['normal'];
+    });
+  };
   const [tiltDirection, setTiltDirection] = useState<TiltDirection>(
     currentAnnotation?.tiltDirection ?? 'right'
   );
@@ -133,7 +159,8 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
   };
 
   const previewAnnotation: ToothAnnotation = {
-    conditionId,
+    conditionId: selectedConditions[0] ?? 'normal',
+    conditionIds: selectedConditions,
     tiltDirection,
     deviationDirection,
     cariesPosition: cariesPositions[0],
@@ -280,13 +307,14 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
-          {tab === 'single' && (
-            <>
+        {tab === 'single' ? (
+          <div className="flex flex-1 flex-col overflow-hidden">
+            {/* Pinned Top Section: Live Preview, Search & Active Sub-options */}
+            <div className="shrink-0 border-b border-slate-200 bg-white px-5 py-3 space-y-2.5 max-h-[52%] overflow-y-auto shadow-[0_2px_8px_-4px_rgba(15,23,42,0.08)]">
               {/* Live Preview + Search */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <div className="flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-1.5 min-w-[110px]">
-                  <svg width="80" height="72" viewBox="-40 -36 80 72">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2.5">
+                <div className="flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-1 min-w-[104px]">
+                  <svg width="80" height="68" viewBox="-40 -34 80 68">
                     <ToothSymbolSvg
                       display={tooth.display}
                       jaw={tooth.jaw}
@@ -295,7 +323,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                     />
                   </svg>
                 </div>
-                <div className="flex-1 space-y-2">
+                <div className="flex-1 space-y-1.5">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
@@ -315,16 +343,16 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
               </div>
 
               {/* Sub-options for specific conditions */}
-              {conditionId === 'tilt' && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-900">
+              {selectedConditions.includes('tilt') && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
                     Chọn hướng di / nghiêng
                   </p>
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setTiltDirection('left')}
-                      className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
                         tiltDirection === 'left'
                           ? 'border-blue-600 bg-blue-600 text-white'
                           : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
@@ -335,7 +363,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                     <button
                       type="button"
                       onClick={() => setTiltDirection('right')}
-                      className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
                         tiltDirection === 'right'
                           ? 'border-blue-600 bg-blue-600 text-white'
                           : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
@@ -347,9 +375,9 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                 </div>
               )}
 
-              {conditionId === 'deviated' && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-900">
+              {selectedConditions.includes('deviated') && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
                     Hướng lệch (N: Ngoài, T: Trong, G: Gần, X: Xa)
                   </p>
                   <div className="grid grid-cols-4 gap-2">
@@ -371,10 +399,10 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                 </div>
               )}
 
-              {(conditionId === 'caries_no_restore' ||
-                conditionId === 'caries_restore') && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-3">
-                  <div className="mb-2 flex items-center justify-between">
+              {(selectedConditions.includes('caries_no_restore') ||
+                selectedConditions.includes('caries_restore')) && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
+                  <div className="mb-1.5 flex items-center justify-between">
                     <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">
                       Vị trí sâu răng (có thể chọn nhiều mặt)
                     </p>
@@ -413,9 +441,9 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                 </div>
               )}
 
-              {conditionId === 'temp_filling' && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-3">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-blue-900">
+              {selectedConditions.includes('temp_filling') && (
+                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
                     Vật liệu trám tạm
                   </p>
                   <div className="grid grid-cols-3 gap-2">
@@ -436,54 +464,60 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                   </div>
                 </div>
               )}
+            </div>
 
-              {/* Categorized condition list */}
-              <div className="space-y-4">
-                {Object.entries(groupedConditions).map(([category, items]) => (
-                  <div key={category}>
-                    <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                      {
-                        CATEGORY_LABELS[
-                          category as keyof typeof CATEGORY_LABELS
-                        ]
-                      }
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {items.map((item) => {
-                        const active = conditionId === item.conditionId;
-                        return (
-                          <button
-                            key={item.stt}
-                            type="button"
-                            onClick={() =>
-                              setConditionId(item.conditionId!)
-                            }
-                            className={`flex items-center justify-between rounded-lg border px-3 py-2 text-left text-sm transition ${
+            {/* Scrollable Condition List */}
+            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+              {Object.entries(groupedConditions).map(([category, items]) => (
+                <div key={category}>
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                    {
+                      CATEGORY_LABELS[
+                        category as keyof typeof CATEGORY_LABELS
+                      ]
+                    }
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {items.map((item) => {
+                      const active = selectedConditions.includes(
+                        item.conditionId!
+                      );
+                      return (
+                        <button
+                          key={item.stt}
+                          type="button"
+                          onClick={() => toggleCondition(item.conditionId!)}
+                          className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-sm transition ${
+                            active
+                              ? 'border-blue-600 bg-blue-50 text-blue-950 ring-1 ring-blue-600'
+                              : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span
+                            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                               active
-                                ? 'border-blue-600 bg-blue-50 text-blue-950 ring-1 ring-blue-600'
-                                : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
+                                ? 'border-blue-600 bg-blue-600 text-white'
+                                : 'border-slate-300 bg-white'
                             }`}
                           >
-                            <div className="pr-2">
-                              <span className="mr-1.5 text-xs font-semibold text-slate-400">
-                                #{item.stt}
-                              </span>
-                              <span className="font-medium">{item.name}</span>
-                            </div>
-                            <span className="shrink-0 text-xs font-medium text-blue-700">
-                              {item.notationDescription.length > 18
-                                ? item.notationDescription.slice(0, 18) + '…'
-                                : item.notationDescription}
+                            {active && <Check className="h-3 w-3 stroke-[3]" />}
+                          </span>
+                          <div>
+                            <span className="mr-1.5 text-xs font-semibold text-slate-400">
+                              #{item.stt}
                             </span>
-                          </button>
-                        );
-                      })}
-                    </div>
+                            <span className="font-medium">{item.name}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                ))}
-              </div>
-            </>
-          )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
 
           {tab === 'gap' && (
             <div className="space-y-4">
@@ -668,6 +702,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
             </div>
           )}
         </div>
+        )}
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-3">

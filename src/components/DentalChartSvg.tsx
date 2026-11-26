@@ -289,7 +289,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
     >
       {/* Phải / Trái anatomical labels */}
       {(showPermanent || showDeciduous) && (
-        <>
+        <g data-side-label="true">
           <g transform={`translate(18, ${badgeCenterY - 14})`}>
             <rect
               x={0}
@@ -337,13 +337,14 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
               Trái
             </text>
           </g>
-        </>
+        </g>
       )}
 
       {/* Permanent Dentition (Răng vĩnh viễn) */}
       {showPermanent && (
         <g>
           <text
+            data-dentition-title="true"
             x={CENTER_X}
             y={permStartY + 8}
             textAnchor="middle"
@@ -386,6 +387,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
       {showDeciduous && (
         <g>
           <text
+            data-dentition-title="true"
             x={CENTER_X}
             y={decStartY + 8}
             textAnchor="middle"

@@ -60,6 +60,10 @@ export function App() {
   useEffect(() => {
     const el = chartScrollRef.current;
     if (!el) return;
+    if (!mobileZoomed) {
+      el.scrollLeft = 0;
+      return;
+    }
     // Center the horizontal scroll on mobile so the midline (4-1 | 1-4) is centered
     if (el.scrollWidth > el.clientWidth) {
       el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
@@ -568,29 +572,27 @@ export function App() {
             ref={chartScrollRef}
             className="w-full overflow-x-auto sm:overflow-visible"
           >
-            <div className="flex justify-center">
-              <DentalChartSvg
-                svgRef={svgRef}
-                showPermanent={showPermanent}
-                showDeciduous={showDeciduous}
-                annotations={annotations}
-                gaps={gaps}
-                spans={spans}
-                generalNote={generalNote}
-                selectedFdi={activeSelectedFdi}
-                onSelectTooth={(tooth) =>
-                  setModalState({ tooth, initialTab: 'single' })
-                }
-                onSelectGap={handleSelectGapDirect}
-                toothColor={toothColor}
-                annotationColor={annotationColor}
-                className={
-                  mobileZoomed
-                    ? 'min-w-[680px] sm:min-w-0 w-full h-auto max-w-[960px] select-none'
-                    : 'w-full h-auto max-w-[960px] select-none'
-                }
-              />
-            </div>
+            <DentalChartSvg
+              svgRef={svgRef}
+              showPermanent={showPermanent}
+              showDeciduous={showDeciduous}
+              annotations={annotations}
+              gaps={gaps}
+              spans={spans}
+              generalNote={generalNote}
+              selectedFdi={activeSelectedFdi}
+              onSelectTooth={(tooth) =>
+                setModalState({ tooth, initialTab: 'single' })
+              }
+              onSelectGap={handleSelectGapDirect}
+              toothColor={toothColor}
+              annotationColor={annotationColor}
+              className={
+                mobileZoomed
+                  ? 'block mx-auto w-[680px] max-w-none sm:w-full sm:max-w-[960px] h-auto select-none'
+                  : 'block mx-auto w-full max-w-[960px] h-auto select-none'
+              }
+            />
           </div>
         </div>
 

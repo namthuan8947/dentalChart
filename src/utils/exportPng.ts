@@ -11,7 +11,7 @@ export interface ExportOptions {
 export const DEFAULT_EXPORT_OPTIONS: ExportOptions = {
   showDentitionTitles: true,
   showSideLabels: true,
-  backgroundColor: 'transparent',
+  backgroundColor: '#FFFFFF',
   hasBorder: true,
   borderColor: '#CBD5E1',
   borderRadius: 16,

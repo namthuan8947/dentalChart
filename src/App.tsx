@@ -511,7 +511,7 @@ export function App() {
                 htmlFor="general-note-input"
                 className="shrink-0 text-xs font-semibold uppercase tracking-wide text-slate-600"
               >
-                Ghi chú chung (#38):
+                Ghi chú chung:
               </label>
               <input
                 id="general-note-input"

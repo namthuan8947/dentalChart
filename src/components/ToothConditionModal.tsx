@@ -344,7 +344,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            Khe hở (#11)
+            Khe hở
           </button>
           <button
             type="button"
@@ -355,7 +355,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                 : 'border-transparent text-slate-600 hover:text-slate-900'
             }`}
           >
-            Cầu răng (#25–28) & Chen chúc (#36)
+            Cầu răng & Chen chúc
           </button>
         </div>
 
@@ -389,7 +389,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                       type="text"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Tìm tình trạng hoặc STT..."
+                      placeholder="Tìm tình trạng răng..."
                       className="w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                     />
                   </div>
@@ -447,9 +447,6 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                                 {active && <Check className="h-3 w-3 stroke-[3]" />}
                               </span>
                               <div>
-                                <span className="mr-1.5 text-xs font-semibold text-slate-400">
-                                  #{item.stt}
-                                </span>
                                 <span className="font-medium">{item.name}</span>
                               </div>
                             </button>
@@ -717,7 +714,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                         : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    Cầu răng (#25–#28)
+                    Cầu răng
                   </button>
                   <button
                     type="button"
@@ -728,7 +725,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                         : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    Răng chen chúc (#36)
+                    Răng chen chúc
                   </button>
                 </div>
 

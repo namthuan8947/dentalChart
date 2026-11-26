@@ -232,9 +232,6 @@ export const LegendModal: React.FC<LegendModalProps> = ({ onClose }) => {
               <div key={item.stt} className="flex items-center gap-3 px-4 py-3">
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-slate-900">
-                    <span className="mr-1.5 text-xs font-semibold text-slate-400">
-                      #{item.stt}
-                    </span>
                     {item.name}
                   </div>
                   <p className="mt-0.5 text-xs text-slate-600">{item.note}</p>

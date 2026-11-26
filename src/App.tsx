@@ -40,6 +40,7 @@ interface SavedChartState {
   generalNote?: string;
   toothColor?: string;
   annotationColor?: string;
+  uiZoom?: number;
 }
 
 function loadSavedState(): SavedChartState {
@@ -91,9 +92,14 @@ export function App() {
     initialState.annotationColor ?? '#1D4ED8'
   );
   const [copiedQuick, setCopiedQuick] = useState(false);
-  const [chartZoom, setChartZoom] = useState<number>(() =>
-    typeof window !== 'undefined' && window.innerWidth < 640 ? 1.75 : 1
-  );
+  const [uiZoom, setUiZoom] = useState<number>(initialState.uiZoom ?? 1);
+
+  useEffect(() => {
+    document.documentElement.style.zoom = uiZoom === 1 ? '' : String(uiZoom);
+    return () => {
+      document.documentElement.style.zoom = '';
+    };
+  }, [uiZoom]);
 
   useEffect(() => {
     try {
@@ -106,6 +112,7 @@ export function App() {
         generalNote,
         toothColor,
         annotationColor,
+        uiZoom,
       };
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch {
@@ -120,23 +127,10 @@ export function App() {
     generalNote,
     toothColor,
     annotationColor,
+    uiZoom,
   ]);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const chartScrollRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const el = chartScrollRef.current;
-    if (!el) return;
-    if (chartZoom <= 1) {
-      el.scrollLeft = 0;
-      return;
-    }
-    // Center the horizontal scroll when zoomed in so the midline is centered
-    if (el.scrollWidth > el.clientWidth) {
-      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
-    }
-  }, [chartZoom, showPermanent, showDeciduous]);
 
   const handleTogglePermanent = (checked: boolean) => {
     if (!checked && !showDeciduous) return;
@@ -406,6 +400,45 @@ export function App() {
               <span>Ghi chú</span>
             </button>
 
+            <div
+              className="inline-flex min-h-[38px] items-center rounded-lg border border-slate-300 bg-white px-0.5"
+              role="group"
+              aria-label="Thu phóng giao diện"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setUiZoom((z) => Math.max(0.7, Number((z - 0.1).toFixed(2))))
+                }
+                disabled={uiZoom <= 0.7}
+                className="flex h-8 w-7 items-center justify-center rounded text-slate-700 disabled:opacity-40"
+                title="Thu nhỏ giao diện"
+                aria-label="Thu nhỏ giao diện"
+              >
+                <ZoomOut className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setUiZoom(1)}
+                className="px-1 text-[11px] font-semibold tabular-nums text-slate-700"
+                title="Đưa về 100%"
+              >
+                {Math.round(uiZoom * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setUiZoom((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))
+                }
+                disabled={uiZoom >= 1.5}
+                className="flex h-8 w-7 items-center justify-center rounded text-slate-700 disabled:opacity-40"
+                title="Phóng to giao diện"
+                aria-label="Phóng to giao diện"
+              >
+                <ZoomIn className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
             {annotatedCount > 0 && (
               <button
                 type="button"
@@ -422,6 +455,45 @@ export function App() {
 
           {/* Desktop Action Buttons */}
           <div className="hidden sm:flex items-center gap-2">
+            <div
+              className="inline-flex items-center rounded-lg border border-slate-300 bg-white p-0.5"
+              role="group"
+              aria-label="Thu phóng giao diện"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setUiZoom((z) => Math.max(0.7, Number((z - 0.1).toFixed(2))))
+                }
+                disabled={uiZoom <= 0.7}
+                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 disabled:opacity-40"
+                title="Thu nhỏ giao diện"
+                aria-label="Thu nhỏ giao diện"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setUiZoom(1)}
+                className="min-w-[48px] px-1.5 py-1 text-center text-xs font-semibold tabular-nums text-slate-700 transition hover:text-blue-700"
+                title="Đưa giao diện về 100%"
+              >
+                {Math.round(uiZoom * 100)}%
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setUiZoom((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))
+                }
+                disabled={uiZoom >= 1.5}
+                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 disabled:opacity-40"
+                title="Phóng to giao diện"
+                aria-label="Phóng to giao diện"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </button>
+            </div>
+
             <button
               type="button"
               onClick={() => setShowColorEditor((v) => !v)}
@@ -614,81 +686,25 @@ export function App() {
 
       {/* Main Stage: Focus on the Dental Chart */}
       <main className="flex-1 flex flex-col items-center justify-center px-3 py-4 sm:px-6 sm:py-6">
-        <div className="w-full max-w-[1000px] rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-6 shadow-sm">
-          {/* Zoom Toolbar (Desktop & Mobile) */}
-          <div className="mb-2.5 flex items-center justify-between gap-2">
-            <span className="text-[11px] font-medium text-slate-500">
-              {chartZoom > 1 ? '← Kéo ngang để xem toàn hàm →' : ''}
-            </span>
-            <div
-              className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 p-0.5"
-              role="group"
-              aria-label="Thu phóng sơ đồ răng"
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setChartZoom((z) => Math.max(0.5, Number((z - 0.25).toFixed(2))))
-                }
-                disabled={chartZoom <= 0.5}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-700 transition hover:bg-white hover:shadow-xs disabled:opacity-40"
-                title="Thu nhỏ"
-                aria-label="Thu nhỏ"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setChartZoom(1)}
-                className="min-w-[52px] px-2 py-1 text-center text-xs font-semibold tabular-nums text-slate-700 transition hover:text-blue-700"
-                title="Đưa về 100% (vừa khung)"
-              >
-                {Math.round(chartZoom * 100)}%
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setChartZoom((z) => Math.min(2, Number((z + 0.25).toFixed(2))))
-                }
-                disabled={chartZoom >= 2}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-700 transition hover:bg-white hover:shadow-xs disabled:opacity-40"
-                title="Phóng to"
-                aria-label="Phóng to"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-
-          <div
-            ref={chartScrollRef}
-            className="w-full overflow-x-auto"
-          >
-            <div
-              className="mx-auto"
-              style={{
-                width: `${Math.round(chartZoom * 100)}%`,
-                minWidth: chartZoom >= 1 ? undefined : undefined,
-              }}
-            >
-              <DentalChartSvg
-                svgRef={svgRef}
-                showPermanent={showPermanent}
-                showDeciduous={showDeciduous}
-                annotations={annotations}
-                gaps={gaps}
-                spans={spans}
-                generalNote={generalNote}
-                selectedFdi={activeSelectedFdi}
-                onSelectTooth={(tooth) =>
-                  setModalState({ tooth, initialTab: 'single' })
-                }
-                onSelectGap={handleSelectGapDirect}
-                toothColor={toothColor}
-                annotationColor={annotationColor}
-                className="block w-full h-auto select-none"
-              />
-            </div>
+        <div className="w-full max-w-[1000px] rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-8 shadow-sm">
+          <div className="w-full overflow-x-auto sm:overflow-visible">
+            <DentalChartSvg
+              svgRef={svgRef}
+              showPermanent={showPermanent}
+              showDeciduous={showDeciduous}
+              annotations={annotations}
+              gaps={gaps}
+              spans={spans}
+              generalNote={generalNote}
+              selectedFdi={activeSelectedFdi}
+              onSelectTooth={(tooth) =>
+                setModalState({ tooth, initialTab: 'single' })
+              }
+              onSelectGap={handleSelectGapDirect}
+              toothColor={toothColor}
+              annotationColor={annotationColor}
+              className="block mx-auto w-full max-w-[960px] h-auto select-none"
+            />
           </div>
         </div>
 

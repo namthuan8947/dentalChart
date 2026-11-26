@@ -105,7 +105,6 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
   const hasRoot = has('root') || has('root_extract') || has('root_restore');
   const hasSlash = has('extract') || has('root_extract');
   const isMissing = has('missing');
-  const hideNumber = isMissing;
   const hasCaries = has('caries_no_restore') || has('caries_restore');
   const hasTilt = has('tilt');
 
@@ -140,26 +139,25 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
 
   return (
     <g transform={`translate(${x}, ${y})`}>
-      {/* Tooth number */}
-      {!hideNumber && (
-        <text
-          x={hasRoot ? 2 : 0}
-          y={6}
-          textAnchor="middle"
-          fill={numberColor}
-          fontFamily="'Times New Roman', Georgia, serif"
-          fontSize="19"
-          fontWeight="500"
-        >
-          {display}
-        </text>
-      )}
+      {/* Tooth number (faint when marked missing so tooth position stays clear) */}
+      <text
+        x={hasRoot ? 2 : 0}
+        y={6}
+        textAnchor="middle"
+        fill={isMissing ? '#94A3B8' : numberColor}
+        fillOpacity={isMissing ? 0.45 : 1}
+        fontFamily="'Times New Roman', Georgia, serif"
+        fontSize="19"
+        fontWeight="500"
+      >
+        {display}
+      </text>
 
       {/* Missing X */}
       {isMissing && (
-        <g stroke={inkColor} strokeWidth="2.3" strokeLinecap="round">
-          <line x1="-7" y1="-8" x2="7" y2="8" />
-          <line x1="7" y1="-8" x2="-7" y2="8" />
+        <g stroke={inkColor} strokeWidth="2.4" strokeLinecap="round">
+          <line x1="-8" y1="-9" x2="8" y2="9" />
+          <line x1="8" y1="-9" x2="-8" y2="9" />
         </g>
       )}
 

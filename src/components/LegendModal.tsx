@@ -175,38 +175,48 @@ export const LegendModal: React.FC<LegendModalProps> = ({ onClose }) => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/45 p-0 sm:p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
+        className="flex h-[92dvh] sm:h-auto sm:max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-t-2xl sm:rounded-xl border border-slate-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-5 py-4">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              Chú giải — Cách ghi sơ đồ răng
-            </h2>
-            <p className="text-xs text-slate-600 mt-0.5">
-              Các ví dụ minh họa cho răng hàm dưới. Đối với răng hàm trên, các ký hiệu và chữ đặt bên trên số răng.
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200 px-4 py-3.5 sm:px-5 sm:py-4">
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                Chú giải — Cách ghi sơ đồ răng
+              </h2>
+              <p className="text-xs text-slate-600 mt-0.5">
+                Ví dụ minh họa cho răng hàm dưới. Với hàm trên, ký hiệu và chữ đặt bên trên số răng.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 sm:hidden"
+              aria-label="Đóng chú giải"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative">
+            <div className="relative flex-1 sm:flex-initial">
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Tìm nội dung hoặc ghi chú..."
-                className="w-56 rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="w-full sm:w-56 rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+              className="hidden sm:flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
               aria-label="Đóng chú giải"
             >
               <X className="h-5 w-5" />
@@ -214,9 +224,35 @@ export const LegendModal: React.FC<LegendModalProps> = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Table */}
+        {/* Table (Desktop) & Card List (Mobile) */}
         <div className="flex-1 overflow-y-auto">
-          <table className="w-full border-collapse text-left text-sm">
+          {/* Mobile card view */}
+          <div className="divide-y divide-slate-200 sm:hidden">
+            {filtered.map((item) => (
+              <div key={item.stt} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-slate-900">
+                    <span className="mr-1.5 text-xs font-semibold text-slate-400">
+                      #{item.stt}
+                    </span>
+                    {item.name}
+                  </div>
+                  <p className="mt-0.5 text-xs text-slate-600">{item.note}</p>
+                </div>
+                <div className="shrink-0 rounded-lg border border-slate-100 bg-slate-50/70 px-1.5 py-1">
+                  <LegendSymbolPreview item={item} />
+                </div>
+              </div>
+            ))}
+            {filtered.length === 0 && (
+              <div className="px-4 py-8 text-center text-sm text-slate-500">
+                Không tìm thấy mục nào phù hợp với &quot;{query}&quot;.
+              </div>
+            )}
+          </div>
+
+          {/* Desktop table view */}
+          <table className="hidden sm:table w-full border-collapse text-left text-sm">
             <thead className="sticky top-0 z-10 bg-slate-100 text-xs font-semibold uppercase tracking-wider text-slate-600">
               <tr>
                 <th className="border-b border-slate-200 px-4 py-3 text-center w-14">STT</th>

@@ -92,11 +92,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/50 p-0 sm:p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
+        className="flex h-[92dvh] sm:h-auto sm:max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-t-2xl sm:rounded-xl border border-slate-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -139,7 +139,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 <img
                   src={previewUrl}
                   alt="Xem trước sơ đồ răng"
-                  className="max-h-[420px] w-auto object-contain"
+                  className="max-h-[210px] sm:max-h-[420px] w-auto object-contain"
                 />
               ) : (
                 <span className="text-sm text-slate-500">Đang tạo xem trước...</span>

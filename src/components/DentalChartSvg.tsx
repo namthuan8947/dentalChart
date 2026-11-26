@@ -29,6 +29,7 @@ interface DentalChartSvgProps {
     rightTooth: ToothMeta
   ) => void;
   svgRef: React.RefObject<SVGSVGElement | null>;
+  className?: string;
 }
 
 const CENTER_X = 450;
@@ -55,6 +56,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
   onSelectTooth,
   onSelectGap,
   svgRef,
+  className,
 }) => {
   // Compute vertical layout dynamically
   let currentY = 26;
@@ -283,7 +285,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
       ref={svgRef}
       xmlns="http://www.w3.org/2000/svg"
       viewBox={`0 0 900 ${totalHeight}`}
-      className="w-full h-auto max-w-[960px] select-none"
+      className={className ?? 'w-full h-auto max-w-[960px] select-none'}
       role="img"
       aria-label="Sơ đồ răng nha khoa"
     >

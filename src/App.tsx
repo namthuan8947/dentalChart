@@ -1,10 +1,12 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   BookOpen,
   Check,
   Copy,
   Download,
   FileText,
+  Maximize2,
+  Minimize2,
   RotateCcw,
 } from 'lucide-react';
 import { DentalChartSvg } from './components/DentalChartSvg';
@@ -42,8 +44,19 @@ export function App() {
   const [showExportModal, setShowExportModal] = useState(false);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
   const [copiedQuick, setCopiedQuick] = useState(false);
+  const [mobileZoomed, setMobileZoomed] = useState(true);
 
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const chartScrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = chartScrollRef.current;
+    if (!el) return;
+    // Center the horizontal scroll on mobile so the midline (4-1 | 1-4) is centered
+    if (el.scrollWidth > el.clientWidth) {
+      el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    }
+  }, [mobileZoomed, showPermanent, showDeciduous]);
 
   const handleTogglePermanent = (checked: boolean) => {
     if (!checked && !showDeciduous) return;
@@ -172,15 +185,56 @@ export function App() {
     <div className="min-h-screen flex flex-col bg-[#f4f6f9] text-slate-900">
       {/* Compact Top Toolbar */}
       <header className="sticky top-0 z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          {/* Title & Dentition Toggles */}
-          <div className="flex flex-wrap items-center gap-4">
-            <h1 className="text-lg font-bold tracking-tight text-slate-900">
-              Sơ đồ răng
-            </h1>
+        <div className="mx-auto max-w-6xl px-3 py-2.5 sm:px-6 sm:py-3 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3">
+          {/* Row 1 on mobile: Title + Primary Actions */}
+          <div className="flex items-center justify-between gap-2 sm:gap-4">
+            <div className="flex items-center gap-2.5">
+              <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900">
+                Sơ đồ răng
+              </h1>
+              {annotatedCount > 0 && (
+                <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-700 ring-1 ring-blue-200">
+                  {annotatedCount}
+                </span>
+              )}
+            </div>
 
+            {/* Mobile-only compact action buttons */}
+            <div className="flex items-center gap-1.5 sm:hidden">
+              <button
+                type="button"
+                onClick={() => setShowLegend(true)}
+                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-800 active:bg-slate-100"
+              >
+                <BookOpen className="h-4 w-4 text-blue-600" />
+                <span>Chú giải</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleQuickCopyPng}
+                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-800 active:bg-slate-100"
+                title="Copy ảnh sơ đồ răng"
+              >
+                {copiedQuick ? (
+                  <Check className="h-4 w-4 text-emerald-600" />
+                ) : (
+                  <Copy className="h-4 w-4 text-slate-600" />
+                )}
+                <span>{copiedQuick ? 'Đã copy' : 'Copy'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowExportModal(true)}
+                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-xs active:bg-blue-700"
+              >
+                <Download className="h-4 w-4" />
+                <span>Export</span>
+              </button>
+            </div>
+
+            {/* Desktop Dentition Toggles */}
             <div
-              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-1"
+              className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1"
               role="group"
               aria-label="Chọn loại sơ đồ răng"
             >
@@ -218,8 +272,74 @@ export function App() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* Row 2 on mobile: Dentition Toggles + Note + Reset */}
+          <div className="flex items-center justify-between gap-2 sm:hidden">
+            <div
+              className="flex flex-1 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-0.5"
+              role="group"
+              aria-label="Chọn loại sơ đồ răng"
+            >
+              <label
+                className={`flex flex-1 min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition ${
+                  showPermanent
+                    ? 'bg-white text-slate-900 shadow-xs ring-1 ring-slate-200'
+                    : 'text-slate-600'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={showPermanent}
+                  onChange={(e) => handleTogglePermanent(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600"
+                />
+                <span>Người lớn</span>
+              </label>
+
+              <label
+                className={`flex flex-1 min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition ${
+                  showDeciduous
+                    ? 'bg-white text-slate-900 shadow-xs ring-1 ring-slate-200'
+                    : 'text-slate-600'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={showDeciduous}
+                  onChange={(e) => handleToggleDeciduous(e.target.checked)}
+                  className="h-3.5 w-3.5 rounded border-slate-300 text-blue-600"
+                />
+                <span>Trẻ em</span>
+              </label>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setShowNoteEditor((v) => !v)}
+              className={`inline-flex min-h-[38px] items-center gap-1 rounded-lg border px-2.5 text-xs font-medium transition ${
+                showNoteEditor || generalNote.trim()
+                  ? 'border-blue-300 bg-blue-50 text-blue-800'
+                  : 'border-slate-300 bg-white text-slate-700'
+              }`}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span>Ghi chú</span>
+            </button>
+
+            {annotatedCount > 0 && (
+              <button
+                type="button"
+                onClick={handleReset}
+                className="inline-flex min-h-[38px] min-w-[38px] items-center justify-center rounded-lg border border-slate-300 bg-white text-slate-700 active:bg-slate-100"
+                title="Đặt lại"
+                aria-label="Đặt lại"
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Desktop Action Buttons */}
+          <div className="hidden sm:flex items-center gap-2">
             <button
               type="button"
               onClick={() => setShowNoteEditor((v) => !v)}
@@ -241,7 +361,7 @@ export function App() {
                 title="Xóa tất cả ký hiệu đã ghi"
               >
                 <RotateCcw className="h-4 w-4" />
-                <span className="hidden sm:inline">Đặt lại</span>
+                <span>Đặt lại</span>
               </button>
             )}
 
@@ -317,31 +437,69 @@ export function App() {
       </header>
 
       {/* Main Stage: Focus on the Dental Chart */}
-      <main className="flex-1 flex flex-col items-center justify-center px-3 py-6 sm:px-6">
-        <div className="w-full max-w-[1000px] rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-8 shadow-sm">
-          <div className="flex justify-center">
-            <DentalChartSvg
-              svgRef={svgRef}
-              showPermanent={showPermanent}
-              showDeciduous={showDeciduous}
-              annotations={annotations}
-              gaps={gaps}
-              spans={spans}
-              generalNote={generalNote}
-              selectedFdi={activeSelectedFdi}
-              onSelectTooth={(tooth) => setSelectedTooth(tooth)}
-              onSelectGap={handleSelectGapDirect}
-            />
+      <main className="flex-1 flex flex-col items-center justify-center px-3 py-4 sm:px-6 sm:py-6">
+        <div className="w-full max-w-[1000px] rounded-2xl border border-slate-200/90 bg-white p-3 sm:p-8 shadow-sm">
+          {/* Mobile zoom/scroll bar */}
+          <div className="mb-2 flex items-center justify-between gap-2 sm:hidden">
+            <span className="text-[11px] font-medium text-slate-500">
+              {mobileZoomed
+                ? '← Vuốt ngang để xem toàn hàm →'
+                : 'Đang thu gọn toàn hàm'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setMobileZoomed((z) => !z)}
+              className="inline-flex items-center gap-1 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 active:bg-slate-100"
+            >
+              {mobileZoomed ? (
+                <>
+                  <Minimize2 className="h-3 w-3" />
+                  <span>Thu gọn</span>
+                </>
+              ) : (
+                <>
+                  <Maximize2 className="h-3 w-3" />
+                  <span>Phóng to</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div
+            ref={chartScrollRef}
+            className="w-full overflow-x-auto sm:overflow-visible"
+          >
+            <div className="flex justify-center">
+              <DentalChartSvg
+                svgRef={svgRef}
+                showPermanent={showPermanent}
+                showDeciduous={showDeciduous}
+                annotations={annotations}
+                gaps={gaps}
+                spans={spans}
+                generalNote={generalNote}
+                selectedFdi={activeSelectedFdi}
+                onSelectTooth={(tooth) => setSelectedTooth(tooth)}
+                onSelectGap={handleSelectGapDirect}
+                className={
+                  mobileZoomed
+                    ? 'min-w-[680px] sm:min-w-0 w-full h-auto max-w-[960px] select-none'
+                    : 'w-full h-auto max-w-[960px] select-none'
+                }
+              />
+            </div>
           </div>
         </div>
 
         {/* Subtle interaction hint */}
-        <div className="mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-xs text-slate-500">
+        <div className="mt-3 sm:mt-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-center text-xs text-slate-500">
           <span>Nhấn vào từng răng để chọn tình trạng và xác nhận</span>
           <span className="hidden sm:inline">·</span>
-          <span>Nhấn vào khoảng giữa 2 răng để ghi khe hở (mm)</span>
+          <span className="hidden sm:inline">
+            Nhấn vào khoảng giữa 2 răng để ghi khe hở (mm)
+          </span>
           <span className="hidden sm:inline">·</span>
-          <span>Export xuất ảnh PNG không nền (nền trong suốt)</span>
+          <span>Export hỗ trợ PNG không nền hoặc có nền & bo viền</span>
         </div>
       </main>
 

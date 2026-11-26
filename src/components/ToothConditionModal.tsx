@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Check, Search, Trash2, X } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Search, Trash2, X } from 'lucide-react';
 import {
   CATEGORY_LABELS,
   DECIDUOUS_TEETH,
@@ -66,11 +66,23 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
     return ['normal'];
   });
 
+  const [expandedSubOption, setExpandedSubOption] =
+    useState<SingleConditionId | null>(null);
+
+  const hasSubOptions = (id: SingleConditionId) =>
+    id === 'tilt' ||
+    id === 'deviated' ||
+    id === 'caries_no_restore' ||
+    id === 'caries_restore' ||
+    id === 'temp_filling';
+
   const toggleCondition = (id: SingleConditionId) => {
     if (id === 'normal') {
       setSelectedConditions(['normal']);
+      setExpandedSubOption(null);
       return;
     }
+    const isCurrentlySelected = selectedConditions.includes(id);
     setSelectedConditions((prev) => {
       const withoutNormal = prev.filter((c) => c !== 'normal');
       const exists = withoutNormal.includes(id);
@@ -79,6 +91,31 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
         : [...withoutNormal, id];
       return next.length > 0 ? next : ['normal'];
     });
+    if (!isCurrentlySelected && hasSubOptions(id)) {
+      setExpandedSubOption(id);
+    } else if (isCurrentlySelected && expandedSubOption === id) {
+      setExpandedSubOption(null);
+    }
+  };
+
+  const getSubOptionButtonLabel = (id: SingleConditionId): string => {
+    switch (id) {
+      case 'tilt':
+        return `Hướng: ${tiltDirection === 'left' ? '←' : '→'}`;
+      case 'deviated':
+        return `Vị trí: lệch ${deviationDirection}`;
+      case 'caries_no_restore':
+      case 'caries_restore': {
+        const short = cariesPositions
+          .map((p) => (p === 'occlusal' ? 'Nhai' : p))
+          .join(', ');
+        return `Vị trí: ${short}`;
+      }
+      case 'temp_filling':
+        return `Vật liệu: ${tempMaterial}`;
+      default:
+        return 'Tùy chọn';
+    }
   };
   const [tiltDirection, setTiltDirection] = useState<TiltDirection>(
     currentAnnotation?.tiltDirection ?? 'right'
@@ -244,25 +281,27 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-[2px]"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/45 p-0 sm:p-4 backdrop-blur-[2px]"
       onClick={onClose}
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl"
+        className="flex h-[92dvh] sm:h-auto sm:max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-2xl sm:rounded-xl border border-slate-200 bg-white shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-200 px-5 py-4">
-          <div>
+        <div className="flex items-start justify-between border-b border-slate-200 px-4 py-3 sm:px-5 sm:py-4">
+          <div className="min-w-0 pr-2">
             <h2 className="text-base font-semibold text-slate-900">
               Chọn tình trạng răng
             </h2>
-            <p className="mt-0.5 text-sm text-slate-600">{getToothLabel(tooth)}</p>
+            <p className="mt-0.5 truncate text-xs sm:text-sm text-slate-600">
+              {getToothLabel(tooth)}
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
             aria-label="Đóng"
           >
             <X className="h-5 w-5" />
@@ -270,11 +309,11 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
         </div>
 
         {/* Mode Tabs */}
-        <div className="flex border-b border-slate-200 bg-slate-50/70 px-5 pt-2 gap-2">
+        <div className="flex shrink-0 overflow-x-auto border-b border-slate-200 bg-slate-50/70 px-4 sm:px-5 pt-1 gap-2">
           <button
             type="button"
             onClick={() => setTab('single')}
-            className={`border-b-2 px-3 py-2 text-sm font-medium transition ${
+            className={`whitespace-nowrap border-b-2 px-2.5 py-2 text-xs sm:text-sm font-medium transition ${
               tab === 'single'
                 ? 'border-blue-600 text-blue-700'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -285,7 +324,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
           <button
             type="button"
             onClick={() => setTab('gap')}
-            className={`border-b-2 px-3 py-2 text-sm font-medium transition ${
+            className={`whitespace-nowrap border-b-2 px-2.5 py-2 text-xs sm:text-sm font-medium transition ${
               tab === 'gap'
                 ? 'border-blue-600 text-blue-700'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -296,7 +335,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
           <button
             type="button"
             onClick={() => setTab('span')}
-            className={`border-b-2 px-3 py-2 text-sm font-medium transition ${
+            className={`whitespace-nowrap border-b-2 px-2.5 py-2 text-xs sm:text-sm font-medium transition ${
               tab === 'span'
                 ? 'border-blue-600 text-blue-700'
                 : 'border-transparent text-slate-600 hover:text-slate-900'
@@ -309,12 +348,16 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
         {/* Body */}
         {tab === 'single' ? (
           <div className="flex flex-1 flex-col overflow-hidden">
-            {/* Pinned Top Section: Live Preview, Search & Active Sub-options */}
-            <div className="shrink-0 border-b border-slate-200 bg-white px-5 py-3 space-y-2.5 max-h-[52%] overflow-y-auto shadow-[0_2px_8px_-4px_rgba(15,23,42,0.08)]">
-              {/* Live Preview + Search */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2.5">
-                <div className="flex items-center justify-center rounded-md border border-slate-200 bg-white px-4 py-1 min-w-[104px]">
-                  <svg width="80" height="68" viewBox="-40 -34 80 68">
+            {/* Pinned Top Section: Live Preview & Search */}
+            <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-2.5 sm:px-5 sm:py-3 shadow-[0_2px_8px_-4px_rgba(15,23,42,0.08)]">
+              <div className="flex flex-row items-center gap-2.5 sm:gap-3 rounded-lg border border-slate-200 bg-slate-50 p-2 sm:p-2.5">
+                <div className="flex items-center justify-center rounded-md border border-slate-200 bg-white px-2 py-0.5 sm:px-4 sm:py-1 shrink-0">
+                  <svg
+                    width="64"
+                    height="56"
+                    viewBox="-40 -34 80 68"
+                    className="sm:w-[80px] sm:h-[68px]"
+                  >
                     <ToothSymbolSvg
                       display={tooth.display}
                       jaw={tooth.jaw}
@@ -323,150 +366,27 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                     />
                   </svg>
                 </div>
-                <div className="flex-1 space-y-1.5">
+                <div className="flex-1 min-w-0 space-y-1">
                   <div className="relative">
                     <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <input
                       type="text"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
-                      placeholder="Tìm theo tên tình trạng hoặc số thứ tự..."
+                      placeholder="Tìm tình trạng hoặc STT..."
                       className="w-full rounded-lg border border-slate-300 bg-white py-1.5 pl-9 pr-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                     />
                   </div>
-                  <p className="text-xs text-slate-500">
+                  <p className="hidden sm:block text-xs text-slate-500">
                     {tooth.jaw === 'upper'
                       ? 'Hàm trên: ký hiệu và chữ sẽ tự động đặt bên trên số răng.'
                       : 'Hàm dưới: ký hiệu và chữ sẽ tự động đặt bên dưới số răng.'}
                   </p>
                 </div>
               </div>
-
-              {/* Sub-options for specific conditions */}
-              {selectedConditions.includes('tilt') && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
-                    Chọn hướng di / nghiêng
-                  </p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setTiltDirection('left')}
-                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
-                        tiltDirection === 'left'
-                          ? 'border-blue-600 bg-blue-600 text-white'
-                          : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      ← Sang trái sơ đồ
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTiltDirection('right')}
-                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
-                        tiltDirection === 'right'
-                          ? 'border-blue-600 bg-blue-600 text-white'
-                          : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                      }`}
-                    >
-                      Sang phải sơ đồ →
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {selectedConditions.includes('deviated') && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
-                    Hướng lệch (N: Ngoài, T: Trong, G: Gần, X: Xa)
-                  </p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {(['N', 'T', 'G', 'X'] as DirectionOption[]).map((dir) => (
-                      <button
-                        key={dir}
-                        type="button"
-                        onClick={() => setDeviationDirection(dir)}
-                        className={`rounded-lg border py-1.5 text-sm font-semibold transition ${
-                          deviationDirection === dir
-                            ? 'border-blue-600 bg-blue-600 text-white'
-                            : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        lệch {dir}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {(selectedConditions.includes('caries_no_restore') ||
-                selectedConditions.includes('caries_restore')) && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
-                  <div className="mb-1.5 flex items-center justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">
-                      Vị trí sâu răng (có thể chọn nhiều mặt)
-                    </p>
-                    <span className="text-[11px] text-blue-700">
-                      {tooth.jaw === 'upper' ? 'Hàm trên' : 'Hàm dưới'} ·{' '}
-                      {tooth.side === 'right' ? 'Bên phải' : 'Bên trái'}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-5 gap-2">
-                    {(
-                      [
-                        { id: 'G', label: 'Gần (G)' },
-                        { id: 'X', label: 'Xa (X)' },
-                        { id: 'occlusal', label: 'Nhai / Cắn' },
-                        { id: 'T', label: 'Trong (T)' },
-                        { id: 'N', label: 'Ngoài (N)' },
-                      ] as { id: CariesPosition; label: string }[]
-                    ).map((pos) => {
-                      const active = cariesPositions.includes(pos.id);
-                      return (
-                        <button
-                          key={pos.id}
-                          type="button"
-                          onClick={() => toggleCariesPosition(pos.id)}
-                          className={`rounded-lg border px-2 py-1.5 text-xs font-medium transition ${
-                            active
-                              ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
-                              : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                          }`}
-                        >
-                          {pos.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {selectedConditions.includes('temp_filling') && (
-                <div className="rounded-lg border border-blue-200 bg-blue-50/60 p-2.5">
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
-                    Vật liệu trám tạm
-                  </p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {(['Cav', 'Eu', 'Cav, Eu'] as TempMaterial[]).map((mat) => (
-                      <button
-                        key={mat}
-                        type="button"
-                        onClick={() => setTempMaterial(mat)}
-                        className={`rounded-lg border py-1.5 text-sm font-medium transition ${
-                          tempMaterial === mat
-                            ? 'border-blue-600 bg-blue-600 text-white'
-                            : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                        }`}
-                      >
-                        {mat}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
 
-            {/* Scrollable Condition List */}
+            {/* Scrollable Condition List with Inline Sub-options */}
             <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
               {Object.entries(groupedConditions).map(([category, items]) => (
                 <div key={category}>
@@ -479,36 +399,214 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {items.map((item) => {
-                      const active = selectedConditions.includes(
-                        item.conditionId!
-                      );
+                      const condId = item.conditionId!;
+                      const active = selectedConditions.includes(condId);
+                      const supportsSub = hasSubOptions(condId);
+                      const isExpanded = active && expandedSubOption === condId;
+
                       return (
-                        <button
+                        <div
                           key={item.stt}
-                          type="button"
-                          onClick={() => toggleCondition(item.conditionId!)}
-                          className={`flex items-center gap-2.5 rounded-lg border px-3 py-2 text-left text-sm transition ${
+                          className={`rounded-lg border transition ${
+                            isExpanded ? 'sm:col-span-2' : ''
+                          } ${
                             active
-                              ? 'border-blue-600 bg-blue-50 text-blue-950 ring-1 ring-blue-600'
+                              ? 'border-blue-600 bg-blue-50/70 text-blue-950 ring-1 ring-blue-600'
                               : 'border-slate-200 bg-white text-slate-800 hover:border-slate-300 hover:bg-slate-50'
                           }`}
                         >
-                          <span
-                            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
-                              active
-                                ? 'border-blue-600 bg-blue-600 text-white'
-                                : 'border-slate-300 bg-white'
-                            }`}
-                          >
-                            {active && <Check className="h-3 w-3 stroke-[3]" />}
-                          </span>
-                          <div>
-                            <span className="mr-1.5 text-xs font-semibold text-slate-400">
-                              #{item.stt}
-                            </span>
-                            <span className="font-medium">{item.name}</span>
+                          <div className="flex items-center justify-between gap-2 px-3 py-2">
+                            <button
+                              type="button"
+                              onClick={() => toggleCondition(condId)}
+                              className="flex flex-1 items-center gap-2.5 text-left text-sm"
+                            >
+                              <span
+                                className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                                  active
+                                    ? 'border-blue-600 bg-blue-600 text-white'
+                                    : 'border-slate-300 bg-white'
+                                }`}
+                              >
+                                {active && <Check className="h-3 w-3 stroke-[3]" />}
+                              </span>
+                              <div>
+                                <span className="mr-1.5 text-xs font-semibold text-slate-400">
+                                  #{item.stt}
+                                </span>
+                                <span className="font-medium">{item.name}</span>
+                              </div>
+                            </button>
+
+                            {active && supportsSub && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setExpandedSubOption((prev) =>
+                                    prev === condId ? null : condId
+                                  );
+                                }}
+                                className={`inline-flex min-h-[32px] shrink-0 items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-semibold transition ${
+                                  isExpanded
+                                    ? 'border-blue-600 bg-blue-600 text-white'
+                                    : 'border-blue-300 bg-white text-blue-700 hover:bg-blue-50'
+                                }`}
+                              >
+                                <span>{getSubOptionButtonLabel(condId)}</span>
+                                {isExpanded ? (
+                                  <ChevronUp className="h-3.5 w-3.5" />
+                                ) : (
+                                  <ChevronDown className="h-3.5 w-3.5" />
+                                )}
+                              </button>
+                            )}
                           </div>
-                        </button>
+
+                          {/* Inline Sub-option Panel */}
+                          {isExpanded && (
+                            <div className="border-t border-blue-200 bg-white/90 px-3 py-2.5 rounded-b-lg">
+                              {condId === 'tilt' && (
+                                <div>
+                                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
+                                    Chọn hướng di / nghiêng
+                                  </p>
+                                  <div className="flex gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => setTiltDirection('left')}
+                                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                                        tiltDirection === 'left'
+                                          ? 'border-blue-600 bg-blue-600 text-white'
+                                          : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                      }`}
+                                    >
+                                      ← Sang trái sơ đồ
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => setTiltDirection('right')}
+                                      className={`flex-1 rounded-lg border px-3 py-1.5 text-sm font-medium transition ${
+                                        tiltDirection === 'right'
+                                          ? 'border-blue-600 bg-blue-600 text-white'
+                                          : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                      }`}
+                                    >
+                                      Sang phải sơ đồ →
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+
+                              {condId === 'deviated' && (
+                                <div>
+                                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
+                                    Hướng lệch (N: Ngoài, T: Trong, G: Gần, X: Xa)
+                                  </p>
+                                  <div className="grid grid-cols-4 gap-2">
+                                    {(['N', 'T', 'G', 'X'] as DirectionOption[]).map(
+                                      (dir) => (
+                                        <button
+                                          key={dir}
+                                          type="button"
+                                          onClick={() =>
+                                            setDeviationDirection(dir)
+                                          }
+                                          className={`rounded-lg border py-1.5 text-sm font-semibold transition ${
+                                            deviationDirection === dir
+                                              ? 'border-blue-600 bg-blue-600 text-white'
+                                              : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                          }`}
+                                        >
+                                          lệch {dir}
+                                        </button>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              )}
+
+                              {(condId === 'caries_no_restore' ||
+                                condId === 'caries_restore') && (
+                                <div>
+                                  <div className="mb-1.5 flex items-center justify-between">
+                                    <p className="text-xs font-semibold uppercase tracking-wide text-blue-900">
+                                      Vị trí sâu răng (có thể chọn nhiều mặt)
+                                    </p>
+                                    <span className="text-[11px] text-blue-700">
+                                      {tooth.jaw === 'upper'
+                                        ? 'Hàm trên'
+                                        : 'Hàm dưới'}{' '}
+                                      ·{' '}
+                                      {tooth.side === 'right'
+                                        ? 'Bên phải'
+                                        : 'Bên trái'}
+                                    </span>
+                                  </div>
+                                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                    {(
+                                      [
+                                        { id: 'G', label: 'Gần (G)' },
+                                        { id: 'X', label: 'Xa (X)' },
+                                        { id: 'occlusal', label: 'Nhai / Cắn' },
+                                        { id: 'T', label: 'Trong (T)' },
+                                        { id: 'N', label: 'Ngoài (N)' },
+                                      ] as {
+                                        id: CariesPosition;
+                                        label: string;
+                                      }[]
+                                    ).map((pos) => {
+                                      const isPosActive =
+                                        cariesPositions.includes(pos.id);
+                                      return (
+                                        <button
+                                          key={pos.id}
+                                          type="button"
+                                          onClick={() =>
+                                            toggleCariesPosition(pos.id)
+                                          }
+                                          className={`rounded-lg border px-2 py-1.5 text-xs font-medium transition ${
+                                            isPosActive
+                                              ? 'border-blue-600 bg-blue-600 text-white shadow-xs'
+                                              : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                          }`}
+                                        >
+                                          {pos.label}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+
+                              {condId === 'temp_filling' && (
+                                <div>
+                                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-blue-900">
+                                    Vật liệu trám tạm
+                                  </p>
+                                  <div className="grid grid-cols-3 gap-2">
+                                    {(
+                                      ['Cav', 'Eu', 'Cav, Eu'] as TempMaterial[]
+                                    ).map((mat) => (
+                                      <button
+                                        key={mat}
+                                        type="button"
+                                        onClick={() => setTempMaterial(mat)}
+                                        className={`rounded-lg border py-1.5 text-sm font-medium transition ${
+                                          tempMaterial === mat
+                                            ? 'border-blue-600 bg-blue-600 text-white'
+                                            : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                        }`}
+                                      >
+                                        {mat}
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -705,7 +803,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-5 py-3">
+        <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50 px-4 py-3 sm:px-5">
           {tab === 'single' ? (
             <button
               type="button"
@@ -713,25 +811,25 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                 onConfirmSingle(tooth.fdi, { conditionId: 'normal' });
                 onClose();
               }}
-              className="text-sm font-medium text-slate-600 hover:text-slate-900"
+              className="min-h-[40px] rounded-lg px-2 text-xs sm:text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-900"
             >
               Đặt về bình thường
             </button>
           ) : (
             <div />
           )}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="min-h-[42px] rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               Hủy
             </button>
             <button
               type="button"
               onClick={handleConfirm}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="inline-flex min-h-[42px] items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
             >
               <Check className="h-4 w-4" />
               Xác nhận

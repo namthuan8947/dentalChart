@@ -327,7 +327,7 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
         </div>
 
         {/* Mode Tabs */}
-        <div className="flex shrink-0 overflow-x-auto border-b border-slate-200 bg-slate-50/70 px-4 sm:px-5 pt-1 gap-2">
+        <div className="no-scrollbar flex shrink-0 overflow-x-auto border-b border-slate-200 bg-slate-50/70 px-3 sm:px-5 pt-1 gap-1 sm:gap-2">
           <button
             type="button"
             onClick={() => setTab('single')}

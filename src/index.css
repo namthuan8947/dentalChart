@@ -22,3 +22,11 @@
 .gap-hit-rect:hover {
   fill: rgba(37, 99, 235, 0.14);
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

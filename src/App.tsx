@@ -246,10 +246,10 @@ export function App() {
     <div className="min-h-screen flex flex-col bg-[#f4f6f9] text-slate-900">
       {/* Compact Top Toolbar */}
       <header className="sticky top-0 z-30 border-b border-slate-200/90 bg-white/95 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-3 py-2.5 sm:px-6 sm:py-3 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-3">
+        <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-5 sm:py-2.5 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:justify-between sm:gap-2">
           {/* Row 1 on mobile: Title + Primary Actions */}
-          <div className="flex items-center justify-between gap-2 sm:gap-4">
-            <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
+            <div className="flex items-center gap-2 whitespace-nowrap">
               <h1 className="text-base sm:text-lg font-bold tracking-tight text-slate-900">
                 Sơ đồ răng
               </h1>
@@ -265,42 +265,42 @@ export function App() {
               <button
                 type="button"
                 onClick={() => setShowLegend(true)}
-                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-800 active:bg-slate-100"
+                className="inline-flex h-9 whitespace-nowrap items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-800 active:bg-slate-100"
               >
-                <BookOpen className="h-4 w-4 text-blue-600" />
+                <BookOpen className="h-3.5 w-3.5 text-blue-600" />
                 <span>Chú giải</span>
               </button>
               <button
                 type="button"
                 onClick={handleQuickCopyPng}
-                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-800 active:bg-slate-100"
+                className="inline-flex h-9 whitespace-nowrap items-center gap-1 rounded-lg border border-slate-300 bg-white px-2.5 text-xs font-semibold text-slate-800 active:bg-slate-100"
                 title="Copy ảnh sơ đồ răng"
               >
                 {copiedQuick ? (
-                  <Check className="h-4 w-4 text-emerald-600" />
+                  <Check className="h-3.5 w-3.5 text-emerald-600" />
                 ) : (
-                  <Copy className="h-4 w-4 text-slate-600" />
+                  <Copy className="h-3.5 w-3.5 text-slate-600" />
                 )}
                 <span>{copiedQuick ? 'Đã copy' : 'Copy'}</span>
               </button>
               <button
                 type="button"
                 onClick={() => setShowExportModal(true)}
-                className="inline-flex min-h-[40px] items-center gap-1 rounded-lg bg-blue-600 px-3 text-xs font-semibold text-white shadow-xs active:bg-blue-700"
+                className="inline-flex h-9 whitespace-nowrap items-center gap-1 rounded-lg border border-transparent bg-blue-600 px-2.5 text-xs font-semibold text-white shadow-xs active:bg-blue-700"
               >
-                <Download className="h-4 w-4" />
+                <Download className="h-3.5 w-3.5" />
                 <span>Export</span>
               </button>
             </div>
 
             {/* Desktop Dentition Toggles */}
             <div
-              className="hidden sm:flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 p-1"
+              className="hidden sm:flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-1"
               role="group"
               aria-label="Chọn loại sơ đồ răng"
             >
               <label
-                className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                className={`flex cursor-pointer whitespace-nowrap items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium transition ${
                   showPermanent
                     ? 'bg-white text-slate-900 shadow-xs ring-1 ring-slate-200'
                     : 'text-slate-600 hover:text-slate-900'
@@ -316,7 +316,7 @@ export function App() {
               </label>
 
               <label
-                className={`flex cursor-pointer items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                className={`flex cursor-pointer whitespace-nowrap items-center gap-1.5 rounded-md px-2.5 py-1 text-sm font-medium transition ${
                   showDeciduous
                     ? 'bg-white text-slate-900 shadow-xs ring-1 ring-slate-200'
                     : 'text-slate-600 hover:text-slate-900'
@@ -333,15 +333,15 @@ export function App() {
             </div>
           </div>
 
-          {/* Row 2 on mobile: Dentition Toggles + Note + Reset */}
-          <div className="flex items-center justify-between gap-2 sm:hidden">
+          {/* Row 2 on mobile: Dentition Toggles + Tools + Zoom */}
+          <div className="flex items-center justify-between gap-1 sm:hidden">
             <div
-              className="flex flex-1 items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 p-0.5"
+              className="flex shrink-0 items-center gap-0.5 rounded-lg border border-slate-200 bg-slate-50 p-0.5"
               role="group"
               aria-label="Chọn loại sơ đồ răng"
             >
               <label
-                className={`flex flex-1 min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition ${
+                className={`flex h-8 whitespace-nowrap cursor-pointer items-center justify-center gap-1 rounded-md px-1.5 text-[11px] font-medium transition ${
                   showPermanent
                     ? 'bg-white text-slate-900 shadow-xs ring-1 ring-slate-200'
                     : 'text-slate-600'
@@ -357,7 +357,7 @@ export function App() {
               </label>
 
               <label
-                className={`flex flex-1 min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-md px-2 text-xs font-medium transition ${
+                className={`flex h-8 whitespace-nowrap cursor-pointer items-center justify-center gap-1 rounded-md px-1.5 text-[11px] font-medium transition ${
                   showDeciduous
                     ? 'bg-white text-slate-900 shadow-xs ring-1 ring-slate-200'
                     : 'text-slate-600'
@@ -373,35 +373,92 @@ export function App() {
               </label>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowColorEditor((v) => !v)}
-              className={`inline-flex min-h-[38px] items-center gap-1 rounded-lg border px-2.5 text-xs font-medium transition ${
-                showColorEditor
-                  ? 'border-blue-300 bg-blue-50 text-blue-800'
-                  : 'border-slate-300 bg-white text-slate-700'
-              }`}
-              title="Đổi màu răng và màu ghi chú"
-            >
-              <Palette className="h-3.5 w-3.5" />
-              <span>Màu</span>
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setShowColorEditor((v) => !v)}
+                className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition ${
+                  showColorEditor
+                    ? 'border-blue-300 bg-blue-50 text-blue-800'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+                title="Đổi màu răng và màu ghi chú"
+                aria-label="Màu sắc"
+              >
+                <Palette className="h-4 w-4" />
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setShowNoteEditor((v) => !v)}
-              className={`inline-flex min-h-[38px] items-center gap-1 rounded-lg border px-2.5 text-xs font-medium transition ${
-                showNoteEditor || generalNote.trim()
-                  ? 'border-blue-300 bg-blue-50 text-blue-800'
-                  : 'border-slate-300 bg-white text-slate-700'
-              }`}
-            >
-              <FileText className="h-3.5 w-3.5" />
-              <span>Ghi chú</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setShowNoteEditor((v) => !v)}
+                className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition ${
+                  showNoteEditor || generalNote.trim()
+                    ? 'border-blue-300 bg-blue-50 text-blue-800'
+                    : 'border-slate-300 bg-white text-slate-700'
+                }`}
+                title="Ghi chú chung"
+                aria-label="Ghi chú"
+              >
+                <FileText className="h-4 w-4" />
+              </button>
 
+              {annotatedCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowResetConfirm(true)}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-300 bg-rose-50 text-rose-700 shadow-xs transition active:bg-rose-100"
+                  title="Đặt lại toàn bộ sơ đồ"
+                  aria-label="Đặt lại"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </button>
+              )}
+
+              <div
+                className="inline-flex h-9 shrink-0 items-center rounded-lg border border-slate-300 bg-white px-0.5"
+                role="group"
+                aria-label="Thu phóng giao diện"
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    setUiZoom((z) => Math.max(0.7, Number((z - 0.1).toFixed(2))))
+                  }
+                  disabled={uiZoom <= 0.7}
+                  className="flex h-7 w-6 items-center justify-center rounded text-slate-700 disabled:opacity-40"
+                  title="Thu nhỏ giao diện"
+                  aria-label="Thu nhỏ giao diện"
+                >
+                  <ZoomOut className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUiZoom(1)}
+                  className="px-0.5 text-[11px] font-semibold tabular-nums text-slate-700"
+                  title="Đưa về 100%"
+                >
+                  {Math.round(uiZoom * 100)}%
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setUiZoom((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))
+                  }
+                  disabled={uiZoom >= 1.5}
+                  className="flex h-7 w-6 items-center justify-center rounded text-slate-700 disabled:opacity-40"
+                  title="Phóng to giao diện"
+                  aria-label="Phóng to giao diện"
+                >
+                  <ZoomIn className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Action Buttons */}
+          <div className="hidden sm:flex items-center gap-1.5">
             <div
-              className="inline-flex min-h-[38px] items-center rounded-lg border border-slate-300 bg-white px-0.5"
+              className="inline-flex h-9 items-center rounded-lg border border-slate-300 bg-white px-0.5"
               role="group"
               aria-label="Thu phóng giao diện"
             >
@@ -411,7 +468,7 @@ export function App() {
                   setUiZoom((z) => Math.max(0.7, Number((z - 0.1).toFixed(2))))
                 }
                 disabled={uiZoom <= 0.7}
-                className="flex h-8 w-7 items-center justify-center rounded text-slate-700 disabled:opacity-40"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 disabled:opacity-40"
                 title="Thu nhỏ giao diện"
                 aria-label="Thu nhỏ giao diện"
               >
@@ -420,62 +477,7 @@ export function App() {
               <button
                 type="button"
                 onClick={() => setUiZoom(1)}
-                className="px-1 text-[11px] font-semibold tabular-nums text-slate-700"
-                title="Đưa về 100%"
-              >
-                {Math.round(uiZoom * 100)}%
-              </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setUiZoom((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))
-                }
-                disabled={uiZoom >= 1.5}
-                className="flex h-8 w-7 items-center justify-center rounded text-slate-700 disabled:opacity-40"
-                title="Phóng to giao diện"
-                aria-label="Phóng to giao diện"
-              >
-                <ZoomIn className="h-3.5 w-3.5" />
-              </button>
-            </div>
-
-            {annotatedCount > 0 && (
-              <button
-                type="button"
-                onClick={() => setShowResetConfirm(true)}
-                className="inline-flex min-h-[38px] items-center justify-center gap-1 rounded-lg border border-rose-300 bg-rose-50 px-2.5 text-xs font-semibold text-rose-700 shadow-xs transition active:bg-rose-100"
-                title="Đặt lại toàn bộ sơ đồ"
-                aria-label="Đặt lại"
-              >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span>Đặt lại</span>
-              </button>
-            )}
-          </div>
-
-          {/* Desktop Action Buttons */}
-          <div className="hidden sm:flex items-center gap-2">
-            <div
-              className="inline-flex items-center rounded-lg border border-slate-300 bg-white p-0.5"
-              role="group"
-              aria-label="Thu phóng giao diện"
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setUiZoom((z) => Math.max(0.7, Number((z - 0.1).toFixed(2))))
-                }
-                disabled={uiZoom <= 0.7}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 disabled:opacity-40"
-                title="Thu nhỏ giao diện"
-                aria-label="Thu nhỏ giao diện"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => setUiZoom(1)}
-                className="min-w-[48px] px-1.5 py-1 text-center text-xs font-semibold tabular-nums text-slate-700 transition hover:text-blue-700"
+                className="min-w-[44px] px-1 text-center text-xs font-semibold tabular-nums text-slate-700 transition hover:text-blue-700"
                 title="Đưa giao diện về 100%"
               >
                 {Math.round(uiZoom * 100)}%
@@ -486,18 +488,18 @@ export function App() {
                   setUiZoom((z) => Math.min(1.5, Number((z + 0.1).toFixed(2))))
                 }
                 disabled={uiZoom >= 1.5}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 disabled:opacity-40"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-slate-700 transition hover:bg-slate-100 disabled:opacity-40"
                 title="Phóng to giao diện"
                 aria-label="Phóng to giao diện"
               >
-                <ZoomIn className="h-4 w-4" />
+                <ZoomIn className="h-3.5 w-3.5" />
               </button>
             </div>
 
             <button
               type="button"
               onClick={() => setShowColorEditor((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              className={`inline-flex h-9 whitespace-nowrap items-center gap-1.5 rounded-lg border px-2.5 text-sm font-medium transition ${
                 showColorEditor
                   ? 'border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100'
                   : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
@@ -511,7 +513,7 @@ export function App() {
             <button
               type="button"
               onClick={() => setShowNoteEditor((v) => !v)}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+              className={`inline-flex h-9 whitespace-nowrap items-center gap-1.5 rounded-lg border px-2.5 text-sm font-medium transition ${
                 showNoteEditor || generalNote.trim()
                   ? 'border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100'
                   : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
@@ -525,7 +527,7 @@ export function App() {
               <button
                 type="button"
                 onClick={() => setShowResetConfirm(true)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 shadow-xs transition hover:bg-rose-100"
+                className="inline-flex h-9 whitespace-nowrap items-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-2.5 text-sm font-semibold text-rose-700 shadow-xs transition hover:bg-rose-100"
                 title="Xóa tất cả ký hiệu đã ghi"
               >
                 <RotateCcw className="h-4 w-4" />
@@ -536,7 +538,7 @@ export function App() {
             <button
               type="button"
               onClick={() => setShowLegend(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+              className="inline-flex h-9 whitespace-nowrap items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
             >
               <BookOpen className="h-4 w-4 text-blue-600" />
               <span>Chú giải</span>
@@ -545,8 +547,8 @@ export function App() {
             <button
               type="button"
               onClick={handleQuickCopyPng}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3.5 py-2 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
-              title="Copy ảnh sơ đồ răng không nền vào clipboard"
+              className="inline-flex h-9 whitespace-nowrap items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+              title="Copy ảnh sơ đồ răng vào clipboard"
             >
               {copiedQuick ? (
                 <>
@@ -564,7 +566,7 @@ export function App() {
             <button
               type="button"
               onClick={() => setShowExportModal(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="inline-flex h-9 whitespace-nowrap items-center gap-1.5 rounded-lg border border-transparent bg-blue-600 px-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
             >
               <Download className="h-4 w-4" />
               <span>Export</span>
@@ -703,7 +705,7 @@ export function App() {
               onSelectGap={handleSelectGapDirect}
               toothColor={toothColor}
               annotationColor={annotationColor}
-              className="block mx-auto w-full max-w-[960px] h-auto select-none"
+              className="block mx-auto w-[640px] max-w-none sm:w-full sm:max-w-[960px] h-auto select-none"
             />
           </div>
         </div>

@@ -143,7 +143,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {/* Content: Preview (left) + Settings (right) */}
         <div className="flex flex-1 flex-col lg:flex-row overflow-y-auto">
           {/* Preview Area */}
-          <div className="flex-1 flex flex-col items-center justify-center p-5 bg-slate-100 border-b lg:border-b-0 lg:border-r border-slate-200 min-h-[260px]">
+          <div className="flex-1 flex flex-col items-center justify-center p-3 sm:p-5 bg-slate-100 border-b lg:border-b-0 lg:border-r border-slate-200 min-h-[150px] sm:min-h-[260px]">
             <div
               className="w-full max-w-2xl rounded-xl p-4 flex items-center justify-center overflow-hidden"
               style={
@@ -183,8 +183,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 Nội dung hiển thị
               </h3>
               <label className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50">
-                <span className="text-slate-800">
-                  Hiện chữ &quot;Răng vĩnh viễn&quot; / &quot;Răng sữa&quot;
+                <span className="text-slate-800 whitespace-nowrap">
+                  Hiện tiêu đề hàm (Vĩnh viễn / Sữa)
                 </span>
                 <input
                   type="checkbox"
@@ -444,18 +444,18 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         {/* Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-5 py-3">
           <div className="text-xs text-red-600">{copyError}</div>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex h-10 whitespace-nowrap items-center rounded-lg border border-slate-300 bg-white px-3.5 sm:px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               Đóng
             </button>
             <button
               type="button"
               onClick={handleCopy}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-blue-600 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
+              className="inline-flex h-10 whitespace-nowrap items-center gap-1.5 rounded-lg border border-blue-600 bg-white px-3.5 sm:px-4 text-sm font-semibold text-blue-700 transition hover:bg-blue-50"
             >
               {copied ? (
                 <>
@@ -472,7 +472,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <button
               type="button"
               onClick={handleDownload}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="inline-flex h-10 whitespace-nowrap items-center gap-1.5 rounded-lg border border-transparent bg-blue-600 px-3.5 sm:px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
             >
               <Download className="h-4 w-4" />
               <span>Tải xuống PNG</span>

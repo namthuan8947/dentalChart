@@ -139,13 +139,12 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
 
   return (
     <g transform={`translate(${x}, ${y})`}>
-      {/* Tooth number (faint when marked missing so tooth position stays clear) */}
+      {/* Tooth number (kept normal and crisp even when marked X) */}
       <text
         x={hasRoot ? 2 : 0}
         y={6}
         textAnchor="middle"
-        fill={isMissing ? '#94A3B8' : numberColor}
-        fillOpacity={isMissing ? 0.45 : 1}
+        fill={numberColor}
         fontFamily="'Times New Roman', Georgia, serif"
         fontSize="19"
         fontWeight="500"
@@ -155,7 +154,7 @@ export const ToothSymbolSvg: React.FC<ToothSymbolSvgProps> = ({
 
       {/* Missing X */}
       {isMissing && (
-        <g stroke={inkColor} strokeWidth="2.4" strokeLinecap="round">
+        <g stroke={inkColor} strokeWidth="2.3" strokeLinecap="round">
           <line x1="-8" y1="-9" x2="8" y2="9" />
           <line x1="8" y1="-9" x2="-8" y2="9" />
         </g>

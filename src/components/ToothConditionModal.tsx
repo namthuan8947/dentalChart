@@ -31,6 +31,8 @@ interface ToothConditionModalProps {
   onSaveSpan: (span: SpanAnnotation, ponticFdis: string[]) => void;
   onDeleteSpan: (id: string) => void;
   onClose: () => void;
+  toothColor?: string;
+  annotationColor?: string;
 }
 
 type ModalTab = 'single' | 'gap' | 'span';
@@ -46,6 +48,8 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
   onSaveSpan,
   onDeleteSpan,
   onClose,
+  toothColor = '#111827',
+  annotationColor = '#1D4ED8',
 }) => {
   const [tab, setTab] = useState<ModalTab>('single');
   const [search, setSearch] = useState('');
@@ -363,6 +367,8 @@ export const ToothConditionModal: React.FC<ToothConditionModalProps> = ({
                       jaw={tooth.jaw}
                       side={tooth.side}
                       annotation={previewAnnotation}
+                      numberColor={toothColor}
+                      inkColor={annotationColor}
                     />
                   </svg>
                 </div>

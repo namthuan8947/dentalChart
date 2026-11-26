@@ -10,6 +10,10 @@ import {
 
 interface ExportModalProps {
   svgRef: React.RefObject<SVGSVGElement | null>;
+  toothColor: string;
+  annotationColor: string;
+  onChangeToothColor: (color: string) => void;
+  onChangeAnnotationColor: (color: string) => void;
   onClose: () => void;
 }
 
@@ -27,8 +31,27 @@ const BORDER_COLOR_PRESETS = [
   { color: '#111827', label: 'Đen' },
 ];
 
+const TOOTH_COLOR_PRESETS = [
+  { color: '#111827', label: 'Đen' },
+  { color: '#334155', label: 'Xám đậm' },
+  { color: '#1E293B', label: 'Xanh than' },
+  { color: '#7C2D12', label: 'Nâu' },
+];
+
+const ANNOTATION_COLOR_PRESETS = [
+  { color: '#1D4ED8', label: 'Xanh dương' },
+  { color: '#DC2626', label: 'Đỏ' },
+  { color: '#059669', label: 'Xanh lá' },
+  { color: '#7C3AED', label: 'Tím' },
+  { color: '#111827', label: 'Đen' },
+];
+
 export const ExportModal: React.FC<ExportModalProps> = ({
   svgRef,
+  toothColor,
+  annotationColor,
+  onChangeToothColor,
+  onChangeAnnotationColor,
   onClose,
 }) => {
   const [options, setOptions] = useState<ExportOptions>(DEFAULT_EXPORT_OPTIONS);
@@ -63,7 +86,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
       cancelled = true;
       if (currentUrl) URL.revokeObjectURL(currentUrl);
     };
-  }, [svgRef, options]);
+  }, [svgRef, options, toothColor, annotationColor]);
 
   const handleDownload = async () => {
     if (!svgRef.current) return;
@@ -190,6 +213,70 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                   className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                 />
               </label>
+            </div>
+
+            {/* Colors: Tooth & Annotation */}
+            <div className="space-y-3 rounded-lg border border-slate-200 bg-slate-50/70 p-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                Màu sắc sơ đồ
+              </h3>
+              <div>
+                <div className="mb-1.5 flex items-center justify-between text-xs text-slate-700">
+                  <span className="font-medium">Màu số răng</span>
+                  <input
+                    type="color"
+                    value={toothColor}
+                    onChange={(e) => onChangeToothColor(e.target.value)}
+                    className="h-6 w-8 cursor-pointer rounded border border-slate-300 bg-white p-0.5"
+                    aria-label="Chọn màu số răng"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  {TOOTH_COLOR_PRESETS.map((c) => (
+                    <button
+                      key={c.color}
+                      type="button"
+                      title={c.label}
+                      onClick={() => onChangeToothColor(c.color)}
+                      className={`h-6 w-6 rounded-full border-2 transition ${
+                        toothColor.toLowerCase() === c.color.toLowerCase()
+                          ? 'scale-110 border-blue-600 ring-2 ring-blue-200'
+                          : 'border-white shadow-xs'
+                      }`}
+                      style={{ backgroundColor: c.color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-1.5 flex items-center justify-between text-xs text-slate-700">
+                  <span className="font-medium">Màu ghi chú / ký hiệu</span>
+                  <input
+                    type="color"
+                    value={annotationColor}
+                    onChange={(e) => onChangeAnnotationColor(e.target.value)}
+                    className="h-6 w-8 cursor-pointer rounded border border-slate-300 bg-white p-0.5"
+                    aria-label="Chọn màu ghi chú"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  {ANNOTATION_COLOR_PRESETS.map((c) => (
+                    <button
+                      key={c.color}
+                      type="button"
+                      title={c.label}
+                      onClick={() => onChangeAnnotationColor(c.color)}
+                      className={`h-6 w-6 rounded-full border-2 transition ${
+                        annotationColor.toLowerCase() === c.color.toLowerCase()
+                          ? 'scale-110 border-blue-600 ring-2 ring-blue-200'
+                          : 'border-white shadow-xs'
+                      }`}
+                      style={{ backgroundColor: c.color }}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Background options */}

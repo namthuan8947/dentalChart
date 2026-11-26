@@ -30,6 +30,8 @@ interface DentalChartSvgProps {
   ) => void;
   svgRef: React.RefObject<SVGSVGElement | null>;
   className?: string;
+  toothColor?: string;
+  annotationColor?: string;
 }
 
 const CENTER_X = 450;
@@ -57,6 +59,8 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
   onSelectGap,
   svgRef,
   className,
+  toothColor = '#111827',
+  annotationColor = BLUE,
 }) => {
   // Compute vertical layout dynamically
   let currentY = 26;
@@ -135,6 +139,8 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
                 annotation={annotation}
                 x={x}
                 y={y}
+                numberColor={toothColor}
+                inkColor={annotationColor}
               />
             </g>
           );
@@ -187,13 +193,13 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
         const midX = (x1 + x2) / 2;
         return (
           <g key={gap.id} transform={`translate(${midX}, ${y})`}>
-            <line x1={-9} y1={-13} x2={-9} y2={13} stroke={BLUE} strokeWidth={1.4} />
-            <line x1={9} y1={-13} x2={9} y2={13} stroke={BLUE} strokeWidth={1.4} />
+            <line x1={-9} y1={-13} x2={-9} y2={13} stroke={annotationColor} strokeWidth={1.4} />
+            <line x1={9} y1={-13} x2={9} y2={13} stroke={annotationColor} strokeWidth={1.4} />
             <text
               x={0}
               y={-1}
               textAnchor="middle"
-              fill={BLUE}
+              fill={annotationColor}
               fontFamily="system-ui, -apple-system, sans-serif"
               fontSize="8.5"
               fontWeight="600"
@@ -204,7 +210,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
               x={0}
               y={9}
               textAnchor="middle"
-              fill={BLUE}
+              fill={annotationColor}
               fontFamily="system-ui, -apple-system, sans-serif"
               fontSize="8"
               fontWeight="600"
@@ -241,7 +247,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
           }
 
           return (
-            <g key={span.id} stroke={BLUE} strokeWidth={1.8} fill="none" strokeLinecap="round">
+            <g key={span.id} stroke={annotationColor} strokeWidth={1.8} fill="none" strokeLinecap="round">
               <line x1={minX} y1={barY} x2={maxX} y2={barY} />
               {indices.map((idx) => {
                 if (pontics.has(idx)) return null;
@@ -259,7 +265,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
 
         return (
           <g key={span.id}>
-            <g stroke={BLUE} strokeWidth={1.5} fill="none" strokeLinecap="round">
+            <g stroke={annotationColor} strokeWidth={1.5} fill="none" strokeLinecap="round">
               <line x1={minX - 6} y1={barY} x2={maxX + 6} y2={barY} />
               <line x1={minX - 6} y1={barY} x2={minX - 6} y2={tickTipY} />
               <line x1={maxX + 6} y1={barY} x2={maxX + 6} y2={tickTipY} />
@@ -268,7 +274,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
               x={midX}
               y={textY}
               textAnchor="middle"
-              fill={BLUE}
+              fill={annotationColor}
               fontFamily="system-ui, -apple-system, sans-serif"
               fontSize="10"
               fontWeight="600"
@@ -300,14 +306,14 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
               height={28}
               rx={2}
               fill="none"
-              stroke="#111827"
+              stroke={toothColor}
               strokeWidth={1.4}
             />
             <text
               x={22}
               y={19}
               textAnchor="middle"
-              fill="#111827"
+              fill={toothColor}
               fontFamily="'Times New Roman', Georgia, serif"
               fontSize="14"
               fontWeight="700"
@@ -324,14 +330,14 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
               height={28}
               rx={2}
               fill="none"
-              stroke="#111827"
+              stroke={toothColor}
               strokeWidth={1.4}
             />
             <text
               x={22}
               y={19}
               textAnchor="middle"
-              fill="#111827"
+              fill={toothColor}
               fontFamily="'Times New Roman', Georgia, serif"
               fontSize="14"
               fontWeight="700"
@@ -436,7 +442,7 @@ export const DentalChartSvg: React.FC<DentalChartSvgProps> = ({
               key={i}
               x={0}
               y={i * 20}
-              fill="#1E3A8A"
+              fill={annotationColor}
               fontFamily="system-ui, -apple-system, sans-serif"
               fontSize="12.5"
               fontWeight={i === 0 ? '600' : '400'}

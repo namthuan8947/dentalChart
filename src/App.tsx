@@ -7,6 +7,7 @@ import {
   FileText,
   Maximize2,
   Minimize2,
+  Palette,
   RotateCcw,
 } from 'lucide-react';
 import { DentalChartSvg } from './components/DentalChartSvg';
@@ -43,6 +44,9 @@ export function App() {
   const [showLegend, setShowLegend] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [showNoteEditor, setShowNoteEditor] = useState(false);
+  const [showColorEditor, setShowColorEditor] = useState(false);
+  const [toothColor, setToothColor] = useState('#111827');
+  const [annotationColor, setAnnotationColor] = useState('#1D4ED8');
   const [copiedQuick, setCopiedQuick] = useState(false);
   const [mobileZoomed, setMobileZoomed] = useState(true);
 
@@ -314,6 +318,20 @@ export function App() {
 
             <button
               type="button"
+              onClick={() => setShowColorEditor((v) => !v)}
+              className={`inline-flex min-h-[38px] items-center gap-1 rounded-lg border px-2.5 text-xs font-medium transition ${
+                showColorEditor
+                  ? 'border-blue-300 bg-blue-50 text-blue-800'
+                  : 'border-slate-300 bg-white text-slate-700'
+              }`}
+              title="Đổi màu răng và màu ghi chú"
+            >
+              <Palette className="h-3.5 w-3.5" />
+              <span>Màu</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setShowNoteEditor((v) => !v)}
               className={`inline-flex min-h-[38px] items-center gap-1 rounded-lg border px-2.5 text-xs font-medium transition ${
                 showNoteEditor || generalNote.trim()
@@ -340,6 +358,20 @@ export function App() {
 
           {/* Desktop Action Buttons */}
           <div className="hidden sm:flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowColorEditor((v) => !v)}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm font-medium transition ${
+                showColorEditor
+                  ? 'border-blue-300 bg-blue-50 text-blue-800 hover:bg-blue-100'
+                  : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+              }`}
+              title="Đổi màu số răng và màu ghi chú"
+            >
+              <Palette className="h-4 w-4" />
+              <span>Màu sắc</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setShowNoteEditor((v) => !v)}
@@ -403,6 +435,86 @@ export function App() {
             </button>
           </div>
         </div>
+
+        {/* Optional Color Settings Drawer */}
+        {showColorEditor && (
+          <div className="border-t border-slate-200 bg-slate-50/80">
+            <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5 sm:px-6">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Màu răng:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {['#111827', '#334155', '#1E293B', '#7C2D12'].map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setToothColor(c)}
+                      className={`h-5 w-5 rounded-full border-2 transition ${
+                        toothColor.toLowerCase() === c.toLowerCase()
+                          ? 'scale-110 border-blue-600 ring-2 ring-blue-200'
+                          : 'border-white shadow-xs'
+                      }`}
+                      style={{ backgroundColor: c }}
+                      aria-label={`Màu răng ${c}`}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={toothColor}
+                    onChange={(e) => setToothColor(e.target.value)}
+                    className="h-6 w-7 cursor-pointer rounded border border-slate-300 bg-white p-0.5"
+                    aria-label="Chọn màu răng tùy chỉnh"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  Màu ghi chú:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {['#1D4ED8', '#DC2626', '#059669', '#7C3AED', '#111827'].map(
+                    (c) => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setAnnotationColor(c)}
+                        className={`h-5 w-5 rounded-full border-2 transition ${
+                          annotationColor.toLowerCase() === c.toLowerCase()
+                            ? 'scale-110 border-blue-600 ring-2 ring-blue-200'
+                            : 'border-white shadow-xs'
+                        }`}
+                        style={{ backgroundColor: c }}
+                        aria-label={`Màu ghi chú ${c}`}
+                      />
+                    )
+                  )}
+                  <input
+                    type="color"
+                    value={annotationColor}
+                    onChange={(e) => setAnnotationColor(e.target.value)}
+                    className="h-6 w-7 cursor-pointer rounded border border-slate-300 bg-white p-0.5"
+                    aria-label="Chọn màu ghi chú tùy chỉnh"
+                  />
+                </div>
+              </div>
+
+              {(toothColor !== '#111827' || annotationColor !== '#1D4ED8') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setToothColor('#111827');
+                    setAnnotationColor('#1D4ED8');
+                  }}
+                  className="text-xs font-medium text-slate-500 hover:text-slate-900"
+                >
+                  Mặc định
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Optional General Note Drawer (#38) */}
         {showNoteEditor && (
@@ -481,6 +593,8 @@ export function App() {
                 selectedFdi={activeSelectedFdi}
                 onSelectTooth={(tooth) => setSelectedTooth(tooth)}
                 onSelectGap={handleSelectGapDirect}
+                toothColor={toothColor}
+                annotationColor={annotationColor}
                 className={
                   mobileZoomed
                     ? 'min-w-[680px] sm:min-w-0 w-full h-auto max-w-[960px] select-none'
@@ -516,6 +630,8 @@ export function App() {
           onSaveSpan={handleSaveSpan}
           onDeleteSpan={handleDeleteSpan}
           onClose={() => setSelectedTooth(null)}
+          toothColor={toothColor}
+          annotationColor={annotationColor}
         />
       )}
 
@@ -526,6 +642,10 @@ export function App() {
       {showExportModal && (
         <ExportModal
           svgRef={svgRef}
+          toothColor={toothColor}
+          annotationColor={annotationColor}
+          onChangeToothColor={setToothColor}
+          onChangeAnnotationColor={setAnnotationColor}
           onClose={() => setShowExportModal(false)}
         />
       )}
